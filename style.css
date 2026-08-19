@@ -6,16 +6,16 @@
 }
 
 :root {
-  --black: #0a0808;
-  --black-soft: #120d0d;
-  --panel: #17100f;
+  --black: #161112;
+  --black-soft: #1e1717;
+  --panel: #241a19;
   --red-dark: #3a0a0a;
   --red-mid: #6e0f0f;
   --red-bright: #b3121a;
   --red-glow: #ff2d3a;
   --gold: #d4af37;
-  --text-main: #f2e9e6;
-  --text-muted: #b8a9a6;
+  --text-main: #efe6e3;
+  --text-muted: #c7b8b5;
   --border: rgba(179, 18, 26, 0.35);
 }
 
