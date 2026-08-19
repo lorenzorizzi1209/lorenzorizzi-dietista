@@ -102,29 +102,15 @@ const GA_MEASUREMENT_ID = 'G-ZVP6EXHDFY';
 const META_PIXEL_ID = '1873333810309595';
 
 // Solo i pulsanti "Prenota" e "Scrivimi" (link WhatsApp) contano come contatto
-function isContactLink(el) {
-  const href = el.getAttribute('href') || '';
-  return href.startsWith('https://wa.me');
-}
-
 function trackButtonClicks() {
-  document.querySelectorAll('a.btn, button.btn').forEach(el => {
+  document.querySelectorAll('a[href^="https://wa.me"]').forEach(el => {
     el.addEventListener('click', () => {
       const label = el.textContent.trim();
-      if (isContactLink(el)) {
-        if (window.gtag) {
-          window.gtag('event', 'contact_click', { event_category: 'contatto', event_label: label });
-        }
-        if (window.fbq) {
-          window.fbq('track', 'Contact', { method: label });
-        }
-      } else {
-        if (window.gtag) {
-          window.gtag('event', 'click', { event_category: 'button', event_label: label });
-        }
-        if (window.fbq) {
-          window.fbq('trackCustom', 'ButtonClick', { button: label });
-        }
+      if (window.gtag) {
+        window.gtag('event', 'contact_click', { event_category: 'contatto', event_label: label });
+      }
+      if (window.fbq) {
+        window.fbq('track', 'Contact', { method: label });
       }
     });
   });
