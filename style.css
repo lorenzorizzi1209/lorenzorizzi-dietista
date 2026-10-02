@@ -1124,10 +1124,24 @@ footer span {
 }
 
 @media (max-width: 700px) {
+  .cookie-banner {
+    padding: 18px 20px;
+  }
   .cookie-banner-inner {
     flex-direction: column;
     align-items: stretch;
     text-align: left;
+    gap: 14px;
+  }
+  .cookie-banner-text h3 {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .cookie-banner-text p {
+    max-height: 4.8em;
+    overflow-y: auto;
+    font-size: 0.76rem;
+    padding-right: 4px;
   }
   .cookie-banner-actions {
     justify-content: center;
