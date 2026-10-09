@@ -87,7 +87,30 @@ function loadAnalytics() {
   function gtag() { window.dataLayer.push(arguments); }
   window.gtag = gtag;
   gtag('js', new Date());
-  gtag('config', GA_MEASUREMENT_ID);
+  // Il page_view lo inviamo noi, con un titolo dedicato (i nomi degli eventi GA non ammettono spazi o "|")
+  gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
+
+  // Evento 1: arrivo sul sito
+  const pageBase = location.origin + location.pathname + location.search;
+  gtag('event', 'page_view', {
+    page_title: 'Lorenzo Rizzi | Home',
+    page_location: pageBase
+  });
+
+  // Evento 2: visualizzazione dei box con i prezzi (una sola volta per visita)
+  const priceBoxes = document.querySelector('.price-cards');
+  if (priceBoxes) {
+    const priceBoxesObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        priceBoxesObserver.disconnect();
+        gtag('event', 'page_view', {
+          page_title: 'Lorenzo Rizzi | Prezzi',
+          page_location: pageBase + '#prezzi'
+        });
+      }
+    }, { threshold: 0.3 });
+    priceBoxesObserver.observe(priceBoxes);
+  }
 
   (function(f, b, e, v, n, t, s) {
     if (f.fbq) return;
