@@ -29,12 +29,8 @@ document.querySelectorAll('.faq-question').forEach(btn => {
 // Navbar shadow on scroll
 const navbar = document.querySelector('.navbar');
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 20) {
-    navbar.style.boxShadow = '0 6px 24px rgba(0,0,0,0.5)';
-  } else {
-    navbar.style.boxShadow = 'none';
-  }
-});
+  navbar.classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
 
 // Reveal on scroll
 const revealEls = document.querySelectorAll('.reveal');
@@ -48,44 +44,6 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 
 revealEls.forEach(el => observer.observe(el));
-
-// Animated counting numbers (stats in "Chi Sono")
-const statNums = document.querySelectorAll('.stat .num');
-
-function animateCount(el) {
-  const target = parseInt(el.dataset.target, 10) || 0;
-  const suffix = el.dataset.suffix || '';
-  const duration = 1600;
-  let startTime = null;
-
-  function step(timestamp) {
-    if (!startTime) startTime = timestamp;
-    const progress = Math.min((timestamp - startTime) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-    const current = Math.floor(eased * target);
-    el.textContent = current.toLocaleString('it-IT') + suffix;
-    if (progress < 1) {
-      requestAnimationFrame(step);
-    } else {
-      el.textContent = target.toLocaleString('it-IT') + suffix;
-    }
-  }
-
-  requestAnimationFrame(step);
-}
-
-if (statNums.length) {
-  const statsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        animateCount(entry.target);
-        statsObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.5 });
-
-  statNums.forEach(el => statsObserver.observe(el));
-}
 
 // Contact form (demo only, no backend)
 const contactForm = document.querySelector('.contact-form form');
@@ -105,7 +63,7 @@ const META_PIXEL_ID = '1873333810309595';
 function trackButtonClicks() {
   document.querySelectorAll('a[href^="https://wa.me"]').forEach(el => {
     el.addEventListener('click', () => {
-      const label = el.textContent.trim();
+      const label = el.dataset.label || el.textContent.replace(/\s+/g, ' ').trim();
       if (window.gtag) {
         window.gtag('event', 'contact_click', { event_category: 'contatto', event_label: label });
       }
@@ -144,12 +102,17 @@ function loadAnalytics() {
   window.fbq('init', META_PIXEL_ID);
   window.fbq('track', 'PageView');
 
-  // Evento dedicato per chi arriva sulla pagina Offerta
-  if (document.body.contains(document.querySelector('.offer-hero'))) {
-    window.fbq('track', 'ViewContent', { content_name: 'Offerta Completa' });
-    if (window.gtag) {
-      window.gtag('event', 'view_offer_page');
-    }
+  // Evento dedicato a chi arriva alla sezione "Costi e Pacchetti" (una sola volta per visita)
+  const pricingSection = document.getElementById('costi');
+  if (pricingSection) {
+    const pricingObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        pricingObserver.disconnect();
+        window.fbq('track', 'ViewContent', { content_name: 'Offerta Completa' });
+        window.gtag('event', 'view_offer_page');
+      }
+    }, { threshold: 0.2 });
+    pricingObserver.observe(pricingSection);
   }
 
   trackButtonClicks();
