@@ -228,18 +228,67 @@ ul {
   width: min(250px, 70vw);
   aspect-ratio: 1 / 1;
   margin: 0 auto 34px;
+}
+
+/* Sfondo del box su un livello a parte, sotto la foto */
+.hero-photo-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   border-radius: 26px;
   background: linear-gradient(160deg, #8e141a 0%, #5e0f12 55%, var(--red-dark) 100%);
   box-shadow: 0 0 0 1px var(--border), 0 18px 44px rgba(179, 18, 26, 0.2);
 }
 
-.hero-photo-box img {
+/* Finestra che taglia la foto sul bordo inferiore del box ma lascia uscire la testa in alto */
+.hero-photo-clip {
+  position: absolute;
+  top: -100px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 0 0 26px 26px;
+}
+
+.hero-photo-clip img {
   position: absolute;
   left: 0;
   bottom: 0;
   width: 100%;
   height: auto;
-  clip-path: inset(-100px 0 0 0 round 0 0 26px 26px);
+}
+
+/* Animazione: il box è fisso, la foto sale dal suo bordo inferiore (1,2 s), poi il testo compare mentre la foto finisce di salire */
+@keyframes heroPhotoRise {
+  from { transform: translateY(105%); }
+  to   { transform: none; }
+}
+
+@keyframes heroFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.hero-photo-clip img {
+  animation: heroPhotoRise 1.2s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+.hero-photo h1 {
+  animation: heroFade 0.8s ease 0.5s both;
+}
+
+.hero-role {
+  animation: heroFade 0.8s ease 0.65s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo-clip img,
+  .hero-photo h1,
+  .hero-role {
+    animation: none;
+  }
 }
 
 .hero-photo h1 {
