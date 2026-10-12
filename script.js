@@ -165,22 +165,26 @@ function clearSavedConsent() {
 }
 
 // Cancella i cookie di misurazione (Google Analytics, Meta) rimasti da una scelta precedente
+// Non deve mai bloccare il banner: alcuni browser integrati (es. Instagram) possono vietare
+// l'accesso a document.cookie, quindi tutto è in try/catch
 function clearTrackingCookies() {
-  const names = document.cookie.split(';')
-    .map(c => c.split('=')[0].trim())
-    .filter(n => n === '_ga' || n.indexOf('_ga_') === 0 || n === '_gid' || n === '_gat' || n === '_fbp' || n === '_fbc');
-  if (!names.length) return;
+  try {
+    const names = document.cookie.split(';')
+      .map(c => c.split('=')[0].trim())
+      .filter(n => n === '_ga' || n.indexOf('_ga_') === 0 || n === '_gid' || n === '_gat' || n === '_fbp' || n === '_fbc');
+    if (!names.length) return;
 
-  const host = location.hostname;
-  const parts = host.split('.');
-  const domains = [host, '.' + host];
-  if (parts.length > 2) domains.push('.' + parts.slice(-2).join('.'));
+    const host = location.hostname;
+    const parts = host.split('.');
+    const domains = [host, '.' + host];
+    if (parts.length > 2) domains.push('.' + parts.slice(-2).join('.'));
 
-  names.forEach(name => {
-    const expired = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-    document.cookie = expired;
-    domains.forEach(d => { document.cookie = expired + '; domain=' + d; });
-  });
+    names.forEach(name => {
+      const expired = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+      document.cookie = expired;
+      domains.forEach(d => { document.cookie = expired + '; domain=' + d; });
+    });
+  } catch (e) { /* accesso ai cookie non consentito: niente da cancellare */ }
 }
 
 const cookieBanner = document.getElementById('cookieBanner');
@@ -191,18 +195,19 @@ if (cookieBanner) {
 
   // Il banner compare finché l'utente non ha scelto: nessuna scelta automatica
   if (consent === 'accepted') {
-    loadAnalytics();
+    try { loadAnalytics(); } catch (e) { /* un errore del tracciamento non deve bloccare il sito */ }
   } else {
-    clearTrackingCookies();
+    // prima si mostra il banner, poi si fa pulizia: un errore nella pulizia non può nasconderlo
     if (consent !== 'rejected') {
       cookieBanner.classList.add('show');
     }
+    clearTrackingCookies();
   }
 
   cookieAccept.addEventListener('click', () => {
     saveConsent('accepted');
     cookieBanner.classList.remove('show');
-    loadAnalytics();
+    try { loadAnalytics(); } catch (e) { /* un errore del tracciamento non deve bloccare il sito */ }
   });
 
   cookieReject.addEventListener('click', () => {
