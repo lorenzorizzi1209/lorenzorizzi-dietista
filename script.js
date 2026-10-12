@@ -141,12 +141,23 @@ function loadAnalytics() {
   trackButtonClicks();
 }
 
+// La memoria del browser può non essere disponibile (modalità privata, blocchi):
+// in quel caso il banner deve comunque comparire e funzionare per la visita in corso
+function readConsent() {
+  try { return localStorage.getItem('cookie_consent'); } catch (e) { return null; }
+}
+
+function saveConsent(value) {
+  try { localStorage.setItem('cookie_consent', value); } catch (e) { /* scelta valida solo per questa visita */ }
+}
+
 const cookieBanner = document.getElementById('cookieBanner');
 if (cookieBanner) {
   const cookieAccept = document.getElementById('cookieAccept');
   const cookieReject = document.getElementById('cookieReject');
-  const consent = localStorage.getItem('cookie_consent');
+  const consent = readConsent();
 
+  // Il banner compare finché l'utente non ha scelto: nessuna scelta automatica
   if (consent === 'accepted') {
     loadAnalytics();
   } else if (consent !== 'rejected') {
@@ -154,13 +165,13 @@ if (cookieBanner) {
   }
 
   cookieAccept.addEventListener('click', () => {
-    localStorage.setItem('cookie_consent', 'accepted');
+    saveConsent('accepted');
     cookieBanner.classList.remove('show');
     loadAnalytics();
   });
 
   cookieReject.addEventListener('click', () => {
-    localStorage.setItem('cookie_consent', 'rejected');
+    saveConsent('rejected');
     cookieBanner.classList.remove('show');
   });
 }
@@ -169,7 +180,7 @@ if (cookieBanner) {
 document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
-    localStorage.removeItem('cookie_consent');
+    try { localStorage.removeItem('cookie_consent'); } catch (err) { /* niente da rimuovere */ }
     location.reload();
   });
 });
