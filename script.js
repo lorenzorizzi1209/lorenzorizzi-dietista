@@ -141,14 +141,46 @@ function loadAnalytics() {
   trackButtonClicks();
 }
 
+// Versione della scelta sui cookie. Per far rifare la scelta a tutti i visitatori
+// basta aumentare il numero: le scelte salvate con versioni precedenti vengono ignorate.
+const CONSENT_VERSION = 2;
+const CONSENT_KEY = 'cookie_consent_v' + CONSENT_VERSION;
+const LEGACY_CONSENT_KEYS = ['cookie_consent'];
+
 // La memoria del browser può non essere disponibile (modalità privata, blocchi):
 // in quel caso il banner deve comunque comparire e funzionare per la visita in corso
 function readConsent() {
-  try { return localStorage.getItem('cookie_consent'); } catch (e) { return null; }
+  try { return localStorage.getItem(CONSENT_KEY); } catch (e) { return null; }
 }
 
 function saveConsent(value) {
-  try { localStorage.setItem('cookie_consent', value); } catch (e) { /* scelta valida solo per questa visita */ }
+  try { localStorage.setItem(CONSENT_KEY, value); } catch (e) { /* scelta valida solo per questa visita */ }
+}
+
+function clearSavedConsent() {
+  try {
+    localStorage.removeItem(CONSENT_KEY);
+    LEGACY_CONSENT_KEYS.forEach(key => localStorage.removeItem(key));
+  } catch (e) { /* niente da rimuovere */ }
+}
+
+// Cancella i cookie di misurazione (Google Analytics, Meta) rimasti da una scelta precedente
+function clearTrackingCookies() {
+  const names = document.cookie.split(';')
+    .map(c => c.split('=')[0].trim())
+    .filter(n => n === '_ga' || n.indexOf('_ga_') === 0 || n === '_gid' || n === '_gat' || n === '_fbp' || n === '_fbc');
+  if (!names.length) return;
+
+  const host = location.hostname;
+  const parts = host.split('.');
+  const domains = [host, '.' + host];
+  if (parts.length > 2) domains.push('.' + parts.slice(-2).join('.'));
+
+  names.forEach(name => {
+    const expired = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+    document.cookie = expired;
+    domains.forEach(d => { document.cookie = expired + '; domain=' + d; });
+  });
 }
 
 const cookieBanner = document.getElementById('cookieBanner');
@@ -160,8 +192,11 @@ if (cookieBanner) {
   // Il banner compare finché l'utente non ha scelto: nessuna scelta automatica
   if (consent === 'accepted') {
     loadAnalytics();
-  } else if (consent !== 'rejected') {
-    cookieBanner.classList.add('show');
+  } else {
+    clearTrackingCookies();
+    if (consent !== 'rejected') {
+      cookieBanner.classList.add('show');
+    }
   }
 
   cookieAccept.addEventListener('click', () => {
@@ -173,6 +208,7 @@ if (cookieBanner) {
   cookieReject.addEventListener('click', () => {
     saveConsent('rejected');
     cookieBanner.classList.remove('show');
+    clearTrackingCookies();
   });
 }
 
@@ -180,7 +216,8 @@ if (cookieBanner) {
 document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
-    try { localStorage.removeItem('cookie_consent'); } catch (err) { /* niente da rimuovere */ }
+    clearSavedConsent();
+    clearTrackingCookies();
     location.reload();
   });
 });
