@@ -1488,10 +1488,3 @@ footer span {
   font-size: 13px;
   color: rgba(227, 215, 211, 0.75);
 }
-#costi small.price-note {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgb(239, 68, 68) !important;
-}
