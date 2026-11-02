@@ -1422,6 +1422,11 @@ footer span {
 }
 
 /* ===== Garanzia (blocco prenotazione) ===== */
+/* a capo del titolo del blocco solo sugli schermi stretti (evita "IO" da solo sulla seconda riga) */
+.br-narrow { display: none; }
+@media (max-width: 440px) {
+  .br-narrow { display: inline; }
+}
 .guarantee {
   max-width: 440px;
   margin: 28px auto 26px;
