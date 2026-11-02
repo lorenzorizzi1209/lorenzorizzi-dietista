@@ -1427,6 +1427,11 @@ footer span {
 @media (max-width: 440px) {
   .br-narrow { display: inline; }
 }
+/* Titolo del blocco prenotazione con lo stesso stile di "Costi e Pacchetti" (.section-title) */
+.offer-cta h2.section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 800;
+}
 .guarantee {
   max-width: 440px;
   margin: 28px auto 26px;
