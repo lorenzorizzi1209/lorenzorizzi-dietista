@@ -547,7 +547,7 @@ section {
 }
 
 .faq-item.active .faq-answer {
-  max-height: 500px;
+  max-height: 900px;
   padding: 0 26px 24px;
 }
 
@@ -1482,6 +1482,25 @@ footer span {
   border-top: 1px solid rgba(247, 242, 240, 0.1);
 }
 .guarantee-list svg { flex: 0 0 20px; height: 20px; margin-top: 2px; }
+/* il testo della garanzia porta alla FAQ corrispondente */
+.guarantee-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.guarantee-link strong {
+  text-decoration: underline;
+  text-decoration-color: rgba(239, 68, 68, 0.6);
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+.guarantee-link:hover strong,
+.guarantee-link:focus-visible strong {
+  color: rgb(239, 68, 68);
+}
+/* lascia spazio al menu fisso quando si arriva a una FAQ */
+.faq-item { scroll-margin-top: 96px; }
 .guarantee-list strong {
   display: block;
   font-size: 15px;

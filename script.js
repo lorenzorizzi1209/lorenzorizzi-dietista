@@ -26,6 +26,30 @@ document.querySelectorAll('.faq-question').forEach(btn => {
   });
 });
 
+// Garanzia: il clic sul testo porta alla FAQ corrispondente e la apre
+function openFaqItem(item) {
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+  item.classList.add('active');
+}
+
+document.querySelectorAll('a.guarantee-link').forEach(link => {
+  link.addEventListener('click', (e) => {
+    const item = document.querySelector(link.getAttribute('href'));
+    if (!item) return;
+    e.preventDefault();
+    openFaqItem(item);
+    item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // una FAQ già aperta sopra si chiude e sposta il layout: si ripete lo scorrimento a cose ferme
+    setTimeout(() => item.scrollIntoView({ behavior: 'smooth', block: 'start' }), 420);
+  });
+});
+
+// Se si arriva con l'indirizzo di una FAQ (es. #faq-garanzia-visita), la FAQ si apre da sola
+const hashFaq = location.hash ? document.getElementById(location.hash.slice(1)) : null;
+if (hashFaq && hashFaq.classList.contains('faq-item')) {
+  openFaqItem(hashFaq);
+}
+
 // Navbar shadow on scroll
 const navbar = document.querySelector('.navbar');
 window.addEventListener('scroll', () => {
