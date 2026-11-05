@@ -1520,7 +1520,7 @@ footer span {
 
 /* ===== Promozione di novembre ===== */
 .promo { padding: 90px 0; background: linear-gradient(180deg, var(--hero-deep), #1f0d0e); }
-.promo-box { max-width: 680px; margin: 0 auto; padding: 48px 32px 44px; text-align: center; background: linear-gradient(165deg, #4a1519 0%, var(--panel-deep) 100%); border: 1px solid var(--red-glow); border-radius: 14px; box-shadow: 0 16px 38px rgba(179, 18, 26, 0.2); }
+.promo-box { max-width: 620px; margin: 0 auto; padding: 48px 32px 44px; text-align: center; background: linear-gradient(165deg, #4a1519 0%, var(--panel-deep) 100%); border: 1px solid var(--red-glow); border-radius: 14px; box-shadow: 0 16px 38px rgba(179, 18, 26, 0.2); }
 .promo-label { display: block; margin-bottom: 12px; color: var(--red-glow); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
 .promo .section-title { margin-bottom: 16px; }
 .promo-lead { max-width: 540px; margin: 0 auto 18px; color: var(--text-muted); }
@@ -1530,9 +1530,9 @@ footer span {
 .promo-value-price s { color: var(--text-muted); font-size: 2.6rem; font-weight: 800; text-decoration-color: var(--red-glow); text-decoration-thickness: 3px; }
 .promo-value-price strong { font-size: 2.6rem; font-weight: 800; text-transform: uppercase; background: linear-gradient(90deg, var(--gold), var(--red-glow)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .promo-timer { margin-bottom: 38px; }
-.promo-countdown { display: flex; justify-content: center; gap: 16px; }
-.promo-unit { flex: 1 1 0; min-width: 0; max-width: 140px; padding: 26px 4px 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-.promo-num { display: block; color: var(--text-main); font-size: 3.9rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.promo-countdown { display: flex; justify-content: center; gap: 14px; }
+.promo-unit { flex: 1 1 0; min-width: 0; max-width: 118px; padding: 22px 4px 16px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.promo-num { display: block; color: var(--text-main); font-size: 3.2rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .promo-unit-label { display: block; margin-top: 6px; color: var(--text-muted); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; }
 
 /* Animazione: a ogni secondo la cifra che cambia scende dall'alto e il riquadro dei secondi pulsa */
@@ -1553,21 +1553,21 @@ footer span {
 
 @media (max-width: 480px) {
   .promo { padding: 64px 0; }
-  .promo-box { padding: 36px 10px 32px; }
+  .promo-box { padding: 36px 16px 32px; }
   .promo .section-title { font-size: 1.6rem; line-height: 1.25; }
   .promo-lead { font-size: 0.95rem; margin-bottom: 16px; }
   .promo-value { margin-bottom: 30px; padding: 14px 22px 16px; }
   .promo-value-price { gap: 12px; }
   .promo-value-price s, .promo-value-price strong { font-size: 2.2rem; }
   .promo-timer { margin-bottom: 32px; }
-  .promo-countdown { gap: 6px; }
-  .promo-unit { padding: 20px 2px 14px; }
-  .promo-num { font-size: 2.7rem; }
+  .promo-countdown { gap: 7px; }
+  .promo-unit { padding: 18px 2px 13px; }
+  .promo-num { font-size: 2.3rem; }
   .promo-unit-label { font-size: 0.62rem; letter-spacing: 0.5px; }
   .promo .btn { display: block; padding: 16px 12px; }
 }
 @media (max-width: 340px) {
-  .promo-num { font-size: 2.3rem; }
+  .promo-num { font-size: 2rem; }
   .promo-value { padding: 12px 14px 14px; }
   .promo-value-price { gap: 10px; }
   .promo-value-price s, .promo-value-price strong { font-size: 1.9rem; }
