@@ -1530,12 +1530,14 @@ footer span {
 .promo-value-price s { color: var(--text-muted); font-size: 2.6rem; font-weight: 800; text-decoration-color: var(--red-glow); text-decoration-thickness: 3px; }
 .promo-value-price strong { font-size: 2.6rem; font-weight: 800; text-transform: uppercase; background: linear-gradient(90deg, var(--gold), var(--red-glow)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .promo-timer { margin-bottom: 38px; }
-.promo-countdown { display: flex; justify-content: center; gap: 14px; }
-.promo-unit { flex: 1 1 0; min-width: 0; max-width: 118px; padding: 22px 4px 16px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-.promo-num { display: block; color: var(--text-main); font-size: 3.2rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.promo-unit-label { display: block; margin-top: 6px; color: var(--text-muted); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; }
+.promo-countdown { --promo-gap: 20px; --promo-num: 3.6rem; display: flex; justify-content: center; gap: var(--promo-gap); }
+.promo-unit { position: relative; flex: 1 1 0; min-width: 0; max-width: 130px; }
+/* due punti tra un valore e l'altro, al posto dei riquadri */
+.promo-unit + .promo-unit::before { content: ":"; position: absolute; left: calc(var(--promo-gap) / -2); top: 0; transform: translateX(-50%); color: rgba(255, 45, 58, 0.55); font-size: var(--promo-num); font-weight: 800; line-height: 1.1; }
+.promo-num { display: block; color: var(--text-main); font-size: var(--promo-num); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.promo-unit-label { display: block; margin-top: 4px; text-shadow: none; color: var(--text-muted); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; }
 
-/* Animazione: a ogni secondo la cifra che cambia scende dall'alto e il riquadro dei secondi pulsa */
+/* Animazione: a ogni secondo la cifra che cambia scende dall'alto e i secondi brillano */
 .promo-num.tick { animation: promoDigit 0.45s cubic-bezier(.2, .8, .3, 1); }
 .promo-unit:last-child { animation: promoPulse 1s ease-in-out infinite; }
 .promo-unit:last-child .promo-num { color: var(--red-glow); }
@@ -1544,8 +1546,8 @@ footer span {
   to { transform: translateY(0); opacity: 1; }
 }
 @keyframes promoPulse {
-  0%, 100% { border-color: var(--border); box-shadow: 0 0 0 rgba(255, 45, 58, 0); }
-  50% { border-color: var(--red-glow); box-shadow: 0 0 22px rgba(255, 45, 58, 0.45); }
+  0%, 100% { text-shadow: 0 0 0 rgba(255, 45, 58, 0); }
+  50% { text-shadow: 0 0 20px rgba(255, 45, 58, 0.85); }
 }
 @media (prefers-reduced-motion: reduce) {
   .promo-num.tick, .promo-unit:last-child { animation: none; }
@@ -1560,14 +1562,12 @@ footer span {
   .promo-value-price { gap: 12px; }
   .promo-value-price s, .promo-value-price strong { font-size: 2.2rem; }
   .promo-timer { margin-bottom: 32px; }
-  .promo-countdown { gap: 7px; }
-  .promo-unit { padding: 18px 2px 13px; }
-  .promo-num { font-size: 2.3rem; }
+  .promo-countdown { --promo-gap: 12px; --promo-num: 2.8rem; }
   .promo-unit-label { font-size: 0.62rem; letter-spacing: 0.5px; }
   .promo .btn { display: block; padding: 16px 12px; }
 }
 @media (max-width: 340px) {
-  .promo-num { font-size: 2rem; }
+  .promo-countdown { --promo-gap: 10px; --promo-num: 2.3rem; }
   .promo-value { padding: 12px 14px 14px; }
   .promo-value-price { gap: 10px; }
   .promo-value-price s, .promo-value-price strong { font-size: 1.9rem; }
