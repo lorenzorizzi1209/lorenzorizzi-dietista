@@ -269,10 +269,19 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     }
     const s = Math.floor(left / 1000);
     const pad = n => String(n).padStart(2, '0');
-    cells.days.textContent = pad(Math.floor(s / 86400));
-    cells.hours.textContent = pad(Math.floor(s % 86400 / 3600));
-    cells.minutes.textContent = pad(Math.floor(s % 3600 / 60));
-    cells.seconds.textContent = pad(s % 60);
+    setCell(cells.days, pad(Math.floor(s / 86400)));
+    setCell(cells.hours, pad(Math.floor(s % 86400 / 3600)));
+    setCell(cells.minutes, pad(Math.floor(s % 3600 / 60)));
+    setCell(cells.seconds, pad(s % 60));
+  }
+
+  // Aggiorna la cifra solo se cambia e ne riavvia l'animazione di comparsa
+  function setCell(el, value) {
+    if (el.textContent === value) return;
+    el.textContent = value;
+    el.classList.remove('tick');
+    void el.offsetWidth;
+    el.classList.add('tick');
   }
 
   tick();

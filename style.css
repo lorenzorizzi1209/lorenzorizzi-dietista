@@ -1519,26 +1519,45 @@ footer span {
 }
 
 /* ===== Promozione di novembre ===== */
-.promo { padding: 60px 0; background: linear-gradient(180deg, var(--hero-deep), #1f0d0e); }
-.promo-box { max-width: 560px; margin: 0 auto; padding: 34px 28px 32px; text-align: center; background: linear-gradient(165deg, #4a1519 0%, var(--panel-deep) 100%); border: 1px solid var(--red-glow); border-radius: 14px; box-shadow: 0 16px 38px rgba(179, 18, 26, 0.2); }
-.promo-label { display: block; margin-bottom: 10px; color: var(--red-glow); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-.promo .section-title { margin-bottom: 12px; }
-.promo-lead { max-width: 420px; margin: 0 auto 24px; color: var(--text-muted); }
-.promo-timer { margin-bottom: 26px; }
-.promo-timer-title { display: block; margin-bottom: 12px; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
-.promo-countdown { display: flex; justify-content: center; gap: 10px; }
-.promo-unit { flex: 1 1 0; min-width: 0; max-width: 84px; padding: 12px 4px 10px; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border); border-radius: 10px; }
-.promo-num { display: block; color: var(--text-main); font-size: 1.9rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.promo-unit-label { display: block; margin-top: 2px; color: var(--text-muted); font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; }
+.promo { padding: 90px 0; background: linear-gradient(180deg, var(--hero-deep), #1f0d0e); }
+.promo-box { max-width: 620px; margin: 0 auto; padding: 48px 32px 44px; text-align: center; background: linear-gradient(165deg, #4a1519 0%, var(--panel-deep) 100%); border: 1px solid var(--red-glow); border-radius: 14px; box-shadow: 0 16px 38px rgba(179, 18, 26, 0.2); }
+.promo-label { display: block; margin-bottom: 12px; color: var(--red-glow); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.promo .section-title { margin-bottom: 16px; }
+.promo-lead { max-width: 420px; margin: 0 auto 34px; color: var(--text-muted); }
+.promo-timer { margin-bottom: 38px; }
+.promo-countdown { display: flex; justify-content: center; gap: 14px; }
+.promo-unit { flex: 1 1 0; min-width: 0; max-width: 118px; padding: 22px 4px 16px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.promo-num { display: block; color: var(--text-main); font-size: 3.2rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.promo-unit-label { display: block; margin-top: 6px; color: var(--text-muted); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; }
+
+/* Animazione: a ogni secondo la cifra che cambia scende dall'alto e il riquadro dei secondi pulsa */
+.promo-num.tick { animation: promoDigit 0.45s cubic-bezier(.2, .8, .3, 1); }
+.promo-unit:last-child { animation: promoPulse 1s ease-in-out infinite; }
+.promo-unit:last-child .promo-num { color: var(--red-glow); }
+@keyframes promoDigit {
+  from { transform: translateY(-45%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes promoPulse {
+  0%, 100% { border-color: var(--border); box-shadow: 0 0 0 rgba(255, 45, 58, 0); }
+  50% { border-color: var(--red-glow); box-shadow: 0 0 22px rgba(255, 45, 58, 0.45); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo-num.tick, .promo-unit:last-child { animation: none; }
+}
+
 @media (max-width: 480px) {
-  .promo { padding: 44px 0; }
-  .promo-box { padding: 26px 16px 24px; }
-  .promo .section-title { font-size: 1.55rem; line-height: 1.25; }
-  .promo-lead { font-size: 0.95rem; margin-bottom: 20px; }
-  .promo-timer { margin-bottom: 22px; }
-  .promo-timer-title { font-size: 0.72rem; letter-spacing: 0.5px; }
-  .promo-countdown { gap: 6px; }
-  .promo-num { font-size: 1.5rem; }
+  .promo { padding: 64px 0; }
+  .promo-box { padding: 36px 16px 32px; }
+  .promo .section-title { font-size: 1.6rem; line-height: 1.25; }
+  .promo-lead { font-size: 0.95rem; margin-bottom: 28px; }
+  .promo-timer { margin-bottom: 32px; }
+  .promo-countdown { gap: 7px; }
+  .promo-unit { padding: 18px 2px 13px; }
+  .promo-num { font-size: 2.3rem; }
   .promo-unit-label { font-size: 0.62rem; letter-spacing: 0.5px; }
-  .promo .btn { display: block; padding: 15px 12px; }
+  .promo .btn { display: block; padding: 16px 12px; }
+}
+@media (max-width: 340px) {
+  .promo-num { font-size: 2rem; }
 }
