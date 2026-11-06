@@ -897,8 +897,10 @@ footer span {
 
 .inc-card {
   position: relative;
-  flex: 0 0 clamp(250px, 78vw, 300px);
-  padding: 30px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 clamp(262px, 80vw, 330px);
+  padding: 32px 24px 24px;
   overflow: hidden;
   scroll-snap-align: start;
   background: linear-gradient(165deg, var(--panel), var(--panel-deep));
@@ -929,8 +931,8 @@ footer span {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 54px;
-  height: 54px;
+  width: 60px;
+  height: 60px;
   margin-bottom: 20px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--red-bright), var(--red-dark));
@@ -958,13 +960,72 @@ footer span {
   box-shadow: 0 16px 38px rgba(179, 18, 26, 0.2);
 }
 
-.inc-extra-label {
+.inc-label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: var(--red-glow);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* cosa si ottiene, in punti */
+.inc-points {
+  margin: 18px 0 20px;
+  padding-top: 16px;
+  list-style: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.inc-points li {
+  position: relative;
+  padding: 0 0 9px 26px;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.inc-points li:last-child {
+  padding-bottom: 0;
+}
+
+.inc-points li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  background: var(--red-bright);
+  border-radius: 50%;
+}
+
+/* il beneficio finale, sempre in fondo alla card */
+.inc-result {
+  margin-top: auto;
+  padding: 12px 14px;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
+  background: rgba(255, 45, 58, 0.1);
+  border-left: 3px solid var(--red-glow);
+  border-radius: 0 8px 8px 0;
+}
+
+.inc-result span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
 }
 
@@ -1051,12 +1112,12 @@ footer span {
   .offer-content.includes { padding-top: 60px; }
   .offer-content.includes .section-subtitle { margin-bottom: 26px; }
   .inc-card {
-    padding: 24px 20px 22px;
+    padding: 26px 20px 20px;
     scroll-snap-stop: always;
   }
   .inc-icon {
-    width: 48px;
-    height: 48px;
+    width: 54px;
+    height: 54px;
     margin-bottom: 16px;
   }
   .inc-title { font-size: 1.1rem; }
