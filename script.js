@@ -168,7 +168,12 @@ function loadAnalytics() {
     const lastCardObserver = new IntersectionObserver((entries) => {
       if (entries.some(e => e.isIntersecting)) {
         lastCardObserver.disconnect();
-        window.gtag('event', 'view_last_card', { event_category: 'engagement', event_label: 'Cosa comprende: ultima card' });
+        // Come per "Home" e "Prezzi": per Google è una visualizzazione di pagina con titolo dedicato
+        // (i nomi degli eventi GA non ammettono spazi né simboli, il titolo sì)
+        window.gtag('event', 'page_view', {
+          page_title: 'Lorenzo Rizzi | LastCard',
+          page_location: pageBase + '#ultima-card'
+        });
         window.fbq('trackCustom', 'ViewLastCard', { content_name: 'Cosa comprende: ultima card' });
       }
     }, { threshold: 0.6 });
