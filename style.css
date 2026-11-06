@@ -1109,7 +1109,7 @@ footer span {
 
 /* Mobile: una swipe = una card, sezione più compatta, comandi facili da toccare */
 @media (max-width: 600px) {
-  .offer-content.includes { padding-top: 60px; }
+  .offer-content.includes { padding-top: 60px; padding-bottom: 80px; }
   .offer-content.includes .section-subtitle { margin-bottom: 26px; }
   .inc-card {
     padding: 26px 20px 20px;
