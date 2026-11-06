@@ -287,3 +287,107 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   tick();
   timerId = setInterval(tick, 1000);
 })();
+
+// Cosa comprende: carosello orizzontale (scorrimento, frecce, puntini, trascinamento col mouse)
+(function () {
+  const carousel = document.querySelector('.inc-carousel');
+  if (!carousel) return;
+  const viewport = carousel.querySelector('.inc-viewport');
+  const track = carousel.querySelector('.inc-track');
+  const prev = carousel.querySelector('.inc-prev');
+  const next = carousel.querySelector('.inc-next');
+  const dotsBox = carousel.querySelector('.inc-dots');
+  const cards = Array.from(track.children);
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const behavior = reduceMotion ? 'auto' : 'smooth';
+
+  const dots = cards.map((card, i) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.tabIndex = -1;
+    dot.addEventListener('click', () => { markTouched(); goTo(i); });
+    dotsBox.appendChild(dot);
+    return dot;
+  });
+
+  function startOffset() { return parseFloat(getComputedStyle(track).paddingLeft) || 0; }
+  function maxScroll() { return track.scrollWidth - track.clientWidth; }
+  function step() { return cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : track.clientWidth; }
+  function nearestIndex() {
+    if (track.scrollLeft >= maxScroll() - 4) return cards.length - 1;
+    return Math.min(cards.length - 1, Math.max(0, Math.round(track.scrollLeft / step())));
+  }
+  function goTo(i) {
+    const index = Math.min(cards.length - 1, Math.max(0, i));
+    track.scrollTo({ left: cards[index].offsetLeft - startOffset(), behavior });
+  }
+  function markTouched() { carousel.classList.add('touched'); }
+
+  let ticking = false;
+  function update() {
+    ticking = false;
+    const x = track.scrollLeft;
+    const max = maxScroll();
+    viewport.classList.toggle('can-left', x > 4);
+    viewport.classList.toggle('can-right', x < max - 4);
+    prev.disabled = x <= 4;
+    next.disabled = x >= max - 4;
+    const active = nearestIndex();
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === active));
+    if (x > 12) markTouched();
+  }
+
+  track.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  window.addEventListener('resize', update);
+
+  prev.addEventListener('click', () => { markTouched(); goTo(nearestIndex() - 1); });
+  next.addEventListener('click', () => { markTouched(); goTo(nearestIndex() + 1); });
+  track.addEventListener('pointerdown', markTouched);
+  track.addEventListener('keydown', markTouched);
+
+  // Trascinamento col mouse (da telefono e trackpad si scorre già da soli)
+  let dragging = false, moved = false, startX = 0, startScroll = 0;
+  track.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    dragging = true; moved = false; startX = e.clientX; startScroll = track.scrollLeft;
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    if (!moved && Math.abs(dx) > 4) {
+      moved = true;
+      track.classList.add('dragging');
+      track.style.scrollSnapType = 'none';
+    }
+    if (moved) track.scrollLeft = startScroll - dx;
+  });
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    if (!moved) return;
+    track.classList.remove('dragging');
+    const index = nearestIndex();
+    track.style.scrollSnapType = '';
+    goTo(index);
+  }
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+
+  // All'ingresso nella pagina le card fanno un piccolo movimento laterale (una volta sola)
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    const nudgeObserver = new IntersectionObserver((entries) => {
+      if (!entries.some(e => e.isIntersecting)) return;
+      nudgeObserver.disconnect();
+      setTimeout(() => {
+        if (track.scrollLeft > 4 || carousel.classList.contains('touched')) return;
+        carousel.classList.add('nudge');
+        cards[0].addEventListener('animationend', () => carousel.classList.remove('nudge'), { once: true });
+      }, 500);
+    }, { threshold: 0.7 });
+    nudgeObserver.observe(viewport);
+  }
+
+  update();
+})();
