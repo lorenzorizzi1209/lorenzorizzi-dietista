@@ -162,6 +162,19 @@ function loadAnalytics() {
     pricingObserver.observe(pricingSection);
   }
 
+  // Evento: la persona ha fatto scorrere il carosello "Cosa comprende" fino all'ultima card (una sola volta per visita)
+  const lastIncludeCard = document.querySelector('.inc-card:last-child');
+  if (lastIncludeCard) {
+    const lastCardObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        lastCardObserver.disconnect();
+        window.gtag('event', 'view_last_card', { event_category: 'engagement', event_label: 'Cosa comprende: ultima card' });
+        window.fbq('trackCustom', 'ViewLastCard', { content_name: 'Cosa comprende: ultima card' });
+      }
+    }, { threshold: 0.6 });
+    lastCardObserver.observe(lastIncludeCard);
+  }
+
   trackButtonClicks();
 }
 
