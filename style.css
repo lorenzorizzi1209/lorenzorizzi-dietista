@@ -1927,3 +1927,11 @@ footer span {
   .journey-step { min-height: 70px; margin-bottom: 80px; }
   .journey-step.journey-step-result:nth-child(n) .journey-text { padding: 24px 20px 26px; }
 }
+
+/* percorso: etichetta + una frase breve, in bianco */
+.journey-text .journey-phrase { color: var(--text-main); font-size: 1.4rem; font-weight: 700; line-height: 1.35; text-wrap: balance; }
+.journey-step-result .journey-text .journey-phrase { font-size: 1.5rem; }
+@media (max-width: 600px) {
+  .journey-text .journey-phrase { font-size: 1.2rem; line-height: 1.4; }
+  .journey-step-result .journey-text .journey-phrase { font-size: 1.3rem; }
+}
