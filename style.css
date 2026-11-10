@@ -1837,6 +1837,7 @@ footer span {
   background: radial-gradient(ellipse at 50% 100%, rgba(179, 18, 26, 0.2), transparent 62%), var(--black);
 }
 .journey .section-title { margin-bottom: 14px; line-height: 1.2; }
+.journey .section-title span { display: block; text-wrap: balance; }
 .journey .section-subtitle { margin-bottom: 56px; }
 
 .journey-map { position: relative; max-width: 760px; margin: 0 auto; }
