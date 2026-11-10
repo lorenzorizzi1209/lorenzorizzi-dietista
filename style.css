@@ -1837,9 +1837,10 @@ footer span {
   background: radial-gradient(ellipse at 50% 100%, rgba(179, 18, 26, 0.2), transparent 62%), var(--black);
 }
 .journey .section-title { margin-bottom: 14px; line-height: 1.2; }
-.journey-eyebrow { display: block; margin-bottom: 16px; color: var(--red-glow); font-size: 0.85rem; font-weight: 700; letter-spacing: 2.5px; line-height: 1.4; text-transform: uppercase; }
-.journey-eyebrow s { text-decoration: line-through; text-decoration-color: var(--text-main); text-decoration-thickness: 2px; opacity: 0.75; }
-.journey-main { display: block; font-size: 1.1em; text-wrap: balance; }
+.journey .section-title span { display: block; text-wrap: balance; }
+/* due frasi distinte: la prima più piccola e spenta, la seconda grande e piena */
+.journey-no { margin-bottom: 14px; color: var(--text-muted); font-size: 0.68em; font-weight: 600; opacity: 0.72; }
+.journey-yes { font-size: 1.12em; }
 .journey .section-subtitle { margin-bottom: 56px; }
 
 .journey-map { position: relative; max-width: 760px; margin: 0 auto; }
@@ -1900,7 +1901,6 @@ footer span {
 @media (max-width: 600px) {
   .journey { padding: 84px 0 96px; }
   .journey .section-title { margin-bottom: 22px; }
-  .journey-eyebrow { font-size: 0.78rem; letter-spacing: 1.8px; }
   .journey .section-subtitle { margin-bottom: 64px; }
   .journey-step { min-height: 120px; margin-bottom: 96px; }
   .journey-node { width: 44px; height: 44px; font-size: 1rem; }
