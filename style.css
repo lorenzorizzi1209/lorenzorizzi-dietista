@@ -1839,7 +1839,8 @@ footer span {
 .journey .section-title { margin-bottom: 14px; line-height: 1.2; }
 .journey .section-title span { display: block; text-wrap: balance; }
 /* due frasi distinte: la prima più piccola e spenta, la seconda grande e piena */
-.journey-no { margin-bottom: 12px; color: var(--text-main); font-size: 0.9em; font-weight: 800; opacity: 0.9; }
+.journey-no { margin-bottom: 12px; color: var(--text-main); font-size: min(0.9em, 5.4vw); font-weight: 800; white-space: nowrap; opacity: 0.9; }
+.journey .section-title .journey-no { text-wrap: nowrap; }
 .journey-yes { font-size: 1.1em; letter-spacing: 0.5px; text-transform: uppercase; }
 .journey .section-subtitle { margin-bottom: 56px; }
 
