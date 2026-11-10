@@ -1918,3 +1918,12 @@ footer span {
 @media (max-width: 360px) {
   .journey-yes { font-size: 0.95em; }
 }
+
+/* percorso: solo etichetta + titolo, senza frase */
+.journey-text h3 { margin-bottom: 0; font-size: 1.45rem; }
+.journey-step { min-height: 64px; margin-bottom: 76px; }
+@media (max-width: 600px) {
+  .journey-text h3 { margin-bottom: 0; font-size: 1.3rem; }
+  .journey-step { min-height: 70px; margin-bottom: 80px; }
+  .journey-step.journey-step-result:nth-child(n) .journey-text { padding: 24px 20px 26px; }
+}
