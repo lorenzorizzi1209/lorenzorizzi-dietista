@@ -1901,7 +1901,7 @@ footer span {
 
 @media (max-width: 600px) {
   .journey { padding: 84px 0 96px; }
-  .journey .section-title { margin-bottom: 22px; }
+  .journey .section-title { margin-bottom: 12px; }
   .journey .section-subtitle { margin-bottom: 64px; }
   .journey-step { min-height: 120px; margin-bottom: 96px; }
   .journey-node { width: 44px; height: 44px; font-size: 1rem; }
