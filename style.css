@@ -1932,3 +1932,19 @@ footer span {
   .journey-text .journey-phrase { font-size: 1.2rem; line-height: 1.4; }
   .journey-step-result .journey-text .journey-phrase { font-size: 1.3rem; }
 }
+
+/* Servizi: card più compatte */
+.services-grid { gap: 20px; }
+.service-card { padding: 26px 22px; }
+.service-card:hover { transform: translateY(-5px); }
+.service-header { gap: 12px; margin-bottom: 10px; }
+.service-icon { width: 42px; height: 42px; }
+.service-icon svg { width: 18px; height: 18px; }
+.service-card h3 { font-size: 1.1rem; }
+.service-subtitle { margin-bottom: 12px; }
+.service-card p { font-size: 0.9rem; line-height: 1.5; margin-bottom: 0; padding-top: 12px; }
+
+/* Il mio metodo: meno testo, spazi più stretti */
+#come-funziona .offer-block { margin-bottom: 56px; }
+#come-funziona .process-steps { gap: 30px; }
+#come-funziona .section-title { margin-bottom: 30px; }
