@@ -1925,7 +1925,7 @@ footer span {
 .journey-step { min-height: 64px; margin-bottom: 76px; }
 @media (max-width: 600px) {
   .journey-text h3 { margin-bottom: 0; font-size: 1.3rem; }
-  .journey-step { min-height: 70px; margin-bottom: 80px; }
+  .journey-step { min-height: 76px; margin-bottom: 112px; }
   .journey-step.journey-step-result:nth-child(n) .journey-text { padding: 24px 20px 26px; }
 }
 
