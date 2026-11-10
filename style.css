@@ -1830,3 +1830,79 @@ footer span {
   .promo-value-price { gap: 10px; }
   .promo-value-price s, .promo-value-price strong { font-size: 1.9rem; }
 }
+
+/* ===== Risultato: percorso curvo che arriva al traguardo ===== */
+.journey {
+  padding: 90px 0 100px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(179, 18, 26, 0.2), transparent 62%), var(--black);
+}
+.journey .section-title { margin-bottom: 14px; line-height: 1.2; }
+.journey .section-subtitle { margin-bottom: 56px; }
+
+.journey-map { position: relative; max-width: 760px; margin: 0 auto; }
+.journey-line { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.journey-track { fill: none; stroke: rgba(255, 255, 255, 0.16); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 0.1 11; }
+.journey-progress { fill: none; stroke: var(--red-glow); stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 5px rgba(255, 45, 58, 0.6)); }
+.journey-measure { fill: none; stroke: none; }
+
+.journey-steps { position: relative; z-index: 1; list-style: none; }
+.journey-step { position: relative; display: flex; align-items: center; min-height: 96px; margin-bottom: 84px; }
+
+.journey-node {
+  position: absolute; top: 50%; left: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; transform: translateY(-50%);
+  color: var(--text-muted); font-size: 1.1rem; font-weight: 800;
+  background: var(--panel-deep);
+  border: 2px solid rgba(255, 255, 255, 0.25); border-radius: 50%;
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+}
+.journey-step:nth-child(even) .journey-node { left: auto; right: 0; }
+.journey-node.reached {
+  color: #fff;
+  background: linear-gradient(135deg, var(--red-bright), var(--red-dark));
+  border-color: var(--red-glow);
+  box-shadow: 0 0 0 6px rgba(255, 45, 58, 0.12), 0 6px 16px rgba(179, 18, 26, 0.35);
+}
+
+.journey-text { max-width: 420px; margin-left: 78px; }
+.journey-step:nth-child(even) .journey-text { margin-left: auto; margin-right: 78px; text-align: right; }
+.journey-label { display: block; margin-bottom: 4px; color: var(--red-glow); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.journey-text h3 { margin-bottom: 6px; font-size: 1.25rem; line-height: 1.3; }
+.journey-text p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.55; }
+
+/* il traguardo: nodo più grande e riquadro in evidenza, al centro */
+.journey-step.journey-step-result { flex-direction: column; margin-bottom: 0; }
+.journey-step.journey-step-result:nth-child(n) .journey-node { position: relative; top: auto; left: auto; right: auto; transform: none; width: 72px; height: 72px; }
+.journey-step.journey-step-result:nth-child(n) .journey-text {
+  max-width: 480px; margin: 22px auto 0; padding: 24px 24px 26px; text-align: center;
+  background: linear-gradient(165deg, #4a1519 0%, var(--panel-deep) 100%);
+  border: 1px solid var(--red-glow); border-radius: 14px;
+  box-shadow: 0 16px 38px rgba(179, 18, 26, 0.22);
+}
+.journey-step-result .journey-label { color: var(--gold); }
+.journey-step-result .journey-text h3 { font-size: 1.6rem; }
+.journey-step-result .journey-node.reached { animation: journeyPulse 2.4s ease-in-out infinite; }
+
+@keyframes journeyPulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(255, 45, 58, 0.14), 0 6px 16px rgba(179, 18, 26, 0.35); }
+  50% { box-shadow: 0 0 0 15px rgba(255, 45, 58, 0.05), 0 6px 22px rgba(255, 45, 58, 0.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-step-result .journey-node.reached { animation: none; }
+  .journey-node { transition: none; }
+}
+
+@media (max-width: 600px) {
+  .journey { padding: 60px 0 70px; }
+  .journey .section-subtitle { margin-bottom: 40px; }
+  .journey-step { margin-bottom: 64px; }
+  .journey-node { width: 44px; height: 44px; font-size: 1rem; }
+  .journey-text { margin-left: 66px; }
+  .journey-step:nth-child(even) .journey-text { margin-right: 66px; }
+  .journey-text h3 { font-size: 1.15rem; }
+  .journey-step.journey-step-result:nth-child(n) .journey-node { width: 64px; height: 64px; }
+  .journey-step.journey-step-result:nth-child(n) .journey-text { padding: 20px 18px 22px; }
+  .journey-step-result .journey-text h3 { font-size: 1.4rem; }
+}

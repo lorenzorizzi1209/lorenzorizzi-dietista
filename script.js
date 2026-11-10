@@ -409,3 +409,90 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
 
   update();
 })();
+
+// Risultato: il percorso curvo si disegna mentre si scorre la pagina e accende i passaggi
+(function () {
+  const map = document.querySelector('.journey-map');
+  if (!map) return;
+  const svg = map.querySelector('.journey-line');
+  const track = svg.querySelector('.journey-track');
+  const progress = svg.querySelector('.journey-progress');
+  const measure = svg.querySelector('.journey-measure');
+  const steps = Array.from(map.querySelectorAll('.journey-step'));
+  const nodes = steps.map(s => s.querySelector('.journey-node'));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let keys = [];
+  let nodeY = [];
+  let ticking = false;
+
+  // Costruisce la curva a partire dalla posizione reale dei passaggi (si adatta a qualsiasi larghezza)
+  function build() {
+    const box = map.getBoundingClientRect();
+    if (!box.width || !box.height) return;
+    const pts = steps.map((s, i) => {
+      const n = nodes[i].getBoundingClientRect();
+      const r = s.getBoundingClientRect();
+      return { x: n.left + n.width / 2 - box.left, y: n.top + n.height / 2 - box.top, top: r.top - box.top, bottom: r.bottom - box.top };
+    });
+    svg.setAttribute('viewBox', '0 0 ' + box.width + ' ' + box.height);
+
+    const cmds = ['M' + pts[0].x + ',' + pts[0].y];
+    const marks = [{ y: pts[0].y, node: 0, cmd: 0 }];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1];
+      const gap = Math.max(0, b.top - a.bottom);
+      cmds.push('L' + a.x + ',' + a.bottom);
+      marks.push({ y: a.bottom, cmd: cmds.length - 1 });
+      cmds.push('C' + a.x + ',' + (a.bottom + gap * 0.65) + ' ' + b.x + ',' + (b.top - gap * 0.65) + ' ' + b.x + ',' + b.top);
+      marks.push({ y: b.top, cmd: cmds.length - 1 });
+      cmds.push('L' + b.x + ',' + b.y);
+      marks.push({ y: b.y, node: i + 1, cmd: cmds.length - 1 });
+    }
+    const d = cmds.join(' ');
+    track.setAttribute('d', d);
+    progress.setAttribute('d', d);
+    measure.setAttribute('d', d);
+    const total = measure.getTotalLength() || 1;
+
+    nodeY = [];
+    keys = marks.map(m => {
+      measure.setAttribute('d', cmds.slice(0, m.cmd + 1).join(' '));
+      if (m.node !== undefined) nodeY[m.node] = m.y;
+      return { y: m.y, f: measure.getTotalLength() / total };
+    });
+    update();
+  }
+
+  // Frazione di percorso già "percorsa" per una data altezza della mappa
+  function fractionAt(y) {
+    if (y <= keys[0].y) return 0;
+    if (y >= keys[keys.length - 1].y) return 1;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const a = keys[i], b = keys[i + 1];
+      if (y >= a.y && y < b.y) {
+        const span = b.y - a.y;
+        return span > 0 ? a.f + (b.f - a.f) * (y - a.y) / span : b.f;
+      }
+    }
+    return 1;
+  }
+
+  function update() {
+    ticking = false;
+    if (!keys.length) return;
+    const headY = reduceMotion ? Infinity : window.innerHeight * 0.65 - map.getBoundingClientRect().top;
+    const f = fractionAt(headY);
+    progress.style.strokeDashoffset = String(1 - f);
+    progress.style.visibility = f > 0.001 ? 'visible' : 'hidden';
+    nodes.forEach((n, i) => n.classList.toggle('reached', headY >= nodeY[i]));
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  window.addEventListener('resize', build);
+  window.addEventListener('load', build);
+  if (window.ResizeObserver) new ResizeObserver(build).observe(map);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+  build();
+})();
