@@ -266,15 +266,14 @@ function consentFlags(value) {
 
 const cookieBanner = document.getElementById('cookieBanner');
 if (cookieBanner) {
-  const cookieAccept = document.getElementById('cookieAccept');
-  const cookieClose = document.getElementById('cookieClose');
-  const cookieContinue = document.getElementById('cookieContinue');
-  const cookiePrefsBtn = document.getElementById('cookiePrefsBtn');
-  const cookiePrefs = document.getElementById('cookiePrefs');
-  const cookieStats = document.getElementById('cookieStats');
-  const cookieMarketing = document.getElementById('cookieMarketing');
-  const cookieSave = document.getElementById('cookieSave');
-  const cookieAcceptAll = document.getElementById('cookieAcceptAll');
+  const $ = (id) => document.getElementById(id);
+  const on = (el, type, fn) => { if (el) el.addEventListener(type, fn); };
+  const cookieMain = $('cookieMain');
+  const cookiePrefs = $('cookiePrefs');
+  const cookiePrefsBtn = $('cookiePrefsBtn');
+  const cookieStats = $('cookieStats');
+  const cookieMarketing = $('cookieMarketing');
+  const cookieScrollBox = cookiePrefs ? cookiePrefs.querySelector('.cookie-prefs-scroll') : null;
   const consent = readConsent();
   const saved = consentFlags(consent);
 
@@ -311,22 +310,30 @@ if (cookieBanner) {
     clearTrackingCookies();
   }
 
-  cookieAccept.addEventListener('click', acceptAll);
-  cookieAcceptAll.addEventListener('click', acceptAll);
-  cookieClose.addEventListener('click', continueWithoutAccepting);
-  cookieContinue.addEventListener('click', continueWithoutAccepting);
+  // Due viste nello stesso banner: quella breve e "Gestisci preferenze" (testo completo + leve in fondo)
+  function showPrefs(open) {
+    if (!cookieMain || !cookiePrefs) return;
+    if (open) {
+      cookieMain.setAttribute('hidden', '');
+      cookiePrefs.removeAttribute('hidden');
+      if (cookieScrollBox) cookieScrollBox.scrollTop = 0;   // si parte sempre dall'inizio del testo
+    } else {
+      cookiePrefs.setAttribute('hidden', '');
+      cookieMain.removeAttribute('hidden');
+    }
+    if (cookiePrefsBtn) cookiePrefsBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
 
-  // "Gestisci preferenze": apre il pannello con le categorie, tutte disattivate di default
-  cookiePrefsBtn.addEventListener('click', () => {
-    const open = cookiePrefs.hasAttribute('hidden');
-    if (open) cookiePrefs.removeAttribute('hidden'); else cookiePrefs.setAttribute('hidden', '');
-    cookiePrefsBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    cookieBanner.classList.toggle('prefs-open', open);
-    if (open) cookiePrefs.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  });
+  on($('cookieAccept'), 'click', acceptAll);
+  on($('cookieAcceptAll'), 'click', acceptAll);
+  on($('cookieClose'), 'click', continueWithoutAccepting);
+  on($('cookieContinue'), 'click', continueWithoutAccepting);
+  on(cookiePrefsBtn, 'click', () => showPrefs(true));
+  on($('cookieBack'), 'click', () => showPrefs(false));
 
-  cookieSave.addEventListener('click', () => {
-    const flags = { stats: cookieStats.checked, marketing: cookieMarketing.checked };
+  // Le categorie sono sempre disattivate di default: il consenso è valido solo se dato con un gesto attivo
+  on($('cookieSave'), 'click', () => {
+    const flags = { stats: !!(cookieStats && cookieStats.checked), marketing: !!(cookieMarketing && cookieMarketing.checked) };
     const chosen = [flags.stats ? 'stats' : '', flags.marketing ? 'marketing' : ''].filter(Boolean);
     if (!chosen.length) {
       continueWithoutAccepting();
