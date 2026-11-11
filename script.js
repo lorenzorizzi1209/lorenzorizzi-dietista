@@ -98,108 +98,89 @@ function trackButtonClicks() {
   });
 }
 
-// consent: { stats: true/false, marketing: true/false }
-// Statistiche = Google Analytics, Marketing = Meta Pixel: ognuno parte solo se la persona l'ha consentito
-function loadAnalytics(consent) {
-  const wantStats = !!(consent && consent.stats);
-  const wantMarketing = !!(consent && consent.marketing);
+function loadAnalytics() {
+  if (window.__analyticsLoaded) return;
+  window.__analyticsLoaded = true;
+
+  const gaScript = document.createElement('script');
+  gaScript.async = true;
+  gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(gaScript);
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { window.dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  // Il page_view lo inviamo noi, con un titolo dedicato (i nomi degli eventi GA non ammettono spazi o "|")
+  gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
+
+  // Evento 1: arrivo sul sito
   const pageBase = location.origin + location.pathname + location.search;
+  gtag('event', 'page_view', {
+    page_title: 'Lorenzo Rizzi | Home',
+    page_location: pageBase
+  });
 
-  // --- Statistiche: Google Analytics ---
-  if (wantStats && !window.__gaLoaded) {
-    window.__gaLoaded = true;
-
-    const gaScript = document.createElement('script');
-    gaScript.async = true;
-    gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    document.head.appendChild(gaScript);
-
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { window.dataLayer.push(arguments); }
-    window.gtag = gtag;
-    gtag('js', new Date());
-    // Il page_view lo inviamo noi, con un titolo dedicato (i nomi degli eventi GA non ammettono spazi o "|")
-    gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
-
-    // Evento 1: arrivo sul sito
-    gtag('event', 'page_view', {
-      page_title: 'Lorenzo Rizzi | Home',
-      page_location: pageBase
-    });
-
-    // Evento 2: visualizzazione dei box con i prezzi (una sola volta per visita)
-    const priceBoxes = document.querySelector('.price-cards');
-    if (priceBoxes) {
-      const priceBoxesObserver = new IntersectionObserver((entries) => {
-        if (entries.some(e => e.isIntersecting)) {
-          priceBoxesObserver.disconnect();
-          gtag('event', 'page_view', {
-            page_title: 'Lorenzo Rizzi | Prezzi',
-            page_location: pageBase + '#prezzi'
-          });
-        }
-      }, { threshold: 0.3 });
-      priceBoxesObserver.observe(priceBoxes);
-    }
+  // Evento 2: visualizzazione dei box con i prezzi (una sola volta per visita)
+  const priceBoxes = document.querySelector('.price-cards');
+  if (priceBoxes) {
+    const priceBoxesObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        priceBoxesObserver.disconnect();
+        gtag('event', 'page_view', {
+          page_title: 'Lorenzo Rizzi | Prezzi',
+          page_location: pageBase + '#prezzi'
+        });
+      }
+    }, { threshold: 0.3 });
+    priceBoxesObserver.observe(priceBoxes);
   }
 
-  // --- Marketing: Meta Pixel ---
-  if (wantMarketing && !window.__metaLoaded) {
-    window.__metaLoaded = true;
+  (function(f, b, e, v, n, t, s) {
+    if (f.fbq) return;
+    n = f.fbq = function() {
+      n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+    };
+    if (!f._fbq) f._fbq = n;
+    n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
+    t = b.createElement(e); t.async = true; t.src = v;
+    s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+  })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+  window.fbq('init', META_PIXEL_ID);
+  window.fbq('track', 'PageView');
 
-    (function(f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function() {
-        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
-      t = b.createElement(e); t.async = true; t.src = v;
-      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-    window.fbq('init', META_PIXEL_ID);
-    window.fbq('track', 'PageView');
+  // Evento dedicato a chi arriva alla sezione "Costi e Pacchetti" (una sola volta per visita)
+  const pricingSection = document.getElementById('costi');
+  if (pricingSection) {
+    const pricingObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        pricingObserver.disconnect();
+        window.fbq('track', 'ViewContent', { content_name: 'Offerta Completa' });
+        window.gtag('event', 'view_offer_page');
+      }
+    }, { threshold: 0.2 });
+    pricingObserver.observe(pricingSection);
   }
 
-  // --- Eventi che usano uno o entrambi i servizi, ma solo quelli attivi ---
-  if ((window.__gaLoaded || window.__metaLoaded) && !window.__eventsBound) {
-    window.__eventsBound = true;
-
-    // Evento dedicato a chi arriva alla sezione "Costi e Pacchetti" (una sola volta per visita)
-    const pricingSection = document.getElementById('costi');
-    if (pricingSection) {
-      const pricingObserver = new IntersectionObserver((entries) => {
-        if (entries.some(e => e.isIntersecting)) {
-          pricingObserver.disconnect();
-          if (window.fbq) window.fbq('track', 'ViewContent', { content_name: 'Offerta Completa' });
-          if (window.gtag) window.gtag('event', 'view_offer_page');
-        }
-      }, { threshold: 0.2 });
-      pricingObserver.observe(pricingSection);
-    }
-
-    // Evento: la persona ha fatto scorrere il carosello "Cosa comprende" fino all'ultima card (una sola volta per visita)
-    const lastIncludeCard = document.querySelector('.inc-card:last-child');
-    if (lastIncludeCard) {
-      const lastCardObserver = new IntersectionObserver((entries) => {
-        if (entries.some(e => e.isIntersecting)) {
-          lastCardObserver.disconnect();
-          // Come per "Home" e "Prezzi": per Google è una visualizzazione di pagina con titolo dedicato
-          // (i nomi degli eventi GA non ammettono spazi né simboli, il titolo sì)
-          if (window.gtag) {
-            window.gtag('event', 'page_view', {
-              page_title: 'Lorenzo Rizzi | LastCard',
-              page_location: pageBase + '#ultima-card'
-            });
-          }
-          if (window.fbq) window.fbq('trackCustom', 'ViewLastCard', { content_name: 'Cosa comprende: ultima card' });
-        }
-      }, { threshold: 0.6 });
-      lastCardObserver.observe(lastIncludeCard);
-    }
-
-    trackButtonClicks();
+  // Evento: la persona ha fatto scorrere il carosello "Cosa comprende" fino all'ultima card (una sola volta per visita)
+  const lastIncludeCard = document.querySelector('.inc-card:last-child');
+  if (lastIncludeCard) {
+    const lastCardObserver = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        lastCardObserver.disconnect();
+        // Come per "Home" e "Prezzi": per Google è una visualizzazione di pagina con titolo dedicato
+        // (i nomi degli eventi GA non ammettono spazi né simboli, il titolo sì)
+        window.gtag('event', 'page_view', {
+          page_title: 'Lorenzo Rizzi | LastCard',
+          page_location: pageBase + '#ultima-card'
+        });
+        window.fbq('trackCustom', 'ViewLastCard', { content_name: 'Cosa comprende: ultima card' });
+      }
+    }, { threshold: 0.6 });
+    lastCardObserver.observe(lastIncludeCard);
   }
+
+  trackButtonClicks();
 }
 
 // Versione della scelta sui cookie. Per far rifare la scelta a tutti i visitatori
@@ -225,19 +206,14 @@ function clearSavedConsent() {
   } catch (e) { /* niente da rimuovere */ }
 }
 
-// Cancella i cookie di misurazione (Google Analytics, Meta) delle categorie NON consentite
+// Cancella i cookie di misurazione (Google Analytics, Meta) rimasti da una scelta precedente
 // Non deve mai bloccare il banner: alcuni browser integrati (es. Instagram) possono vietare
 // l'accesso a document.cookie, quindi tutto è in try/catch
-function clearTrackingCookies(keep) {
-  keep = keep || {};
+function clearTrackingCookies() {
   try {
     const names = document.cookie.split(';')
       .map(c => c.split('=')[0].trim())
-      .filter(n => {
-        const isGoogle = n === '_ga' || n.indexOf('_ga_') === 0 || n === '_gid' || n === '_gat';
-        const isMeta = n === '_fbp' || n === '_fbc';
-        return (isGoogle && !keep.stats) || (isMeta && !keep.marketing);
-      });
+      .filter(n => n === '_ga' || n.indexOf('_ga_') === 0 || n === '_gid' || n === '_gat' || n === '_fbp' || n === '_fbc');
     if (!names.length) return;
 
     const host = location.hostname;
@@ -253,38 +229,15 @@ function clearTrackingCookies(keep) {
   } catch (e) { /* accesso ai cookie non consentito: niente da cancellare */ }
 }
 
-// Scelta salvata -> categorie consentite. Valori: 'accepted' (tutto), 'rejected' (niente),
-// 'custom:stats,marketing' (scelta parziale dal pannello "Gestisci preferenze")
-function consentFlags(value) {
-  if (value === 'accepted') return { stats: true, marketing: true };
-  if (typeof value === 'string' && value.indexOf('custom:') === 0) {
-    const parts = value.slice(7).split(',');
-    return { stats: parts.indexOf('stats') > -1, marketing: parts.indexOf('marketing') > -1 };
-  }
-  return { stats: false, marketing: false };
-}
-
 const cookieBanner = document.getElementById('cookieBanner');
 if (cookieBanner) {
-  const $ = (id) => document.getElementById(id);
-  const on = (el, type, fn) => { if (el) el.addEventListener(type, fn); };
-  const cookieMain = $('cookieMain');
-  const cookiePrefs = $('cookiePrefs');
-  const cookiePrefsBtn = $('cookiePrefsBtn');
-  const cookieStats = $('cookieStats');
-  const cookieMarketing = $('cookieMarketing');
-  const cookieScrollBox = cookiePrefs ? cookiePrefs.querySelector('.cookie-prefs-scroll') : null;
+  const cookieAccept = document.getElementById('cookieAccept');
+  const cookieReject = document.getElementById('cookieReject');
   const consent = readConsent();
-  const saved = consentFlags(consent);
-
-  function applyConsent(flags) {
-    try { loadAnalytics(flags); } catch (e) { /* un errore del tracciamento non deve bloccare il sito */ }
-    clearTrackingCookies(flags);
-  }
 
   // Il banner compare finché l'utente non ha scelto: nessuna scelta automatica
-  if (saved.stats || saved.marketing) {
-    applyConsent(saved);
+  if (consent === 'accepted') {
+    try { loadAnalytics(); } catch (e) { /* un errore del tracciamento non deve bloccare il sito */ }
   } else {
     // prima si mostra il banner, poi si fa pulizia: un errore nella pulizia non può nasconderlo
     if (consent !== 'rejected') {
@@ -293,55 +246,16 @@ if (cookieBanner) {
     clearTrackingCookies();
   }
 
-  function closeBanner() {
-    cookieBanner.classList.remove('show');
-  }
-
-  function acceptAll() {
+  cookieAccept.addEventListener('click', () => {
     saveConsent('accepted');
-    closeBanner();
-    applyConsent({ stats: true, marketing: true });
-  }
+    cookieBanner.classList.remove('show');
+    try { loadAnalytics(); } catch (e) { /* un errore del tracciamento non deve bloccare il sito */ }
+  });
 
-  // Chiudere con la X o "continua senza accettare" = nessun consenso (solo cookie tecnici)
-  function continueWithoutAccepting() {
+  cookieReject.addEventListener('click', () => {
     saveConsent('rejected');
-    closeBanner();
+    cookieBanner.classList.remove('show');
     clearTrackingCookies();
-  }
-
-  // Due viste nello stesso banner: quella breve e "Gestisci preferenze" (testo completo + leve in fondo)
-  function showPrefs(open) {
-    if (!cookieMain || !cookiePrefs) return;
-    if (open) {
-      cookieMain.setAttribute('hidden', '');
-      cookiePrefs.removeAttribute('hidden');
-      if (cookieScrollBox) cookieScrollBox.scrollTop = 0;   // si parte sempre dall'inizio del testo
-    } else {
-      cookiePrefs.setAttribute('hidden', '');
-      cookieMain.removeAttribute('hidden');
-    }
-    if (cookiePrefsBtn) cookiePrefsBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-
-  on($('cookieAccept'), 'click', acceptAll);
-  on($('cookieAcceptAll'), 'click', acceptAll);
-  on($('cookieClose'), 'click', continueWithoutAccepting);
-  on($('cookieContinue'), 'click', continueWithoutAccepting);
-  on(cookiePrefsBtn, 'click', () => showPrefs(true));
-  on($('cookieBack'), 'click', () => showPrefs(false));
-
-  // Le categorie sono sempre disattivate di default: il consenso è valido solo se dato con un gesto attivo
-  on($('cookieSave'), 'click', () => {
-    const flags = { stats: !!(cookieStats && cookieStats.checked), marketing: !!(cookieMarketing && cookieMarketing.checked) };
-    const chosen = [flags.stats ? 'stats' : '', flags.marketing ? 'marketing' : ''].filter(Boolean);
-    if (!chosen.length) {
-      continueWithoutAccepting();
-      return;
-    }
-    saveConsent('custom:' + chosen.join(','));
-    closeBanner();
-    applyConsent(flags);
   });
 }
 
