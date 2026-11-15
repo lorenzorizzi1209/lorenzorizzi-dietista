@@ -407,30 +407,23 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   let stage = 0;               // 0 = non ancora arrivato, 1 = fermo al fondo, 2 = fatto
   let locked = false, lockY = 0;
   let lastY = window.scrollY, lastInput = 0, lastWheel = 0, touching = false, navUntil = 0;
-  let touchY = null, touchX = 0;
+  let touchY = null, touchX = 0, lastTouch = 0;
+  let userMotion = false, lastScrollEvt = 0, lastBottom = Infinity, stopY = 0;
 
   // il blocco scatta solo se la persona sta scorrendo lei (non per un clic sul menù che porta più in basso)
-  const noteInput = () => { lastInput = performance.now(); };
-  window.addEventListener('touchstart', () => { touching = true; noteInput(); }, { passive: true });
-  window.addEventListener('touchend', () => { touching = false; noteInput(); }, { passive: true });
-  window.addEventListener('touchcancel', () => { touching = false; noteInput(); }, { passive: true });
+  const noteInput = () => { lastInput = lastTouch = performance.now(); };
+  const capturePassive = { capture: true, passive: true };
+  window.addEventListener('touchstart', () => { touching = true; noteInput(); }, capturePassive);
+  window.addEventListener('touchend', () => { touching = false; noteInput(); }, capturePassive);
+  window.addEventListener('touchcancel', () => { touching = false; noteInput(); }, capturePassive);
+  window.addEventListener('pointerdown', noteInput, capturePassive);
+  // dito sullo schermo: se il browser integrato non manda "touchend", dopo un po' senza segnali lo si considera alzato
+  function fingerDown() { return touching && performance.now() - lastTouch < 1200; }
   document.addEventListener('click', (e) => {
     if (e.target.closest && e.target.closest('a[href^="#"]')) navUntil = performance.now() + 3000;
   }, true);
-  function userIsScrolling() {
-    const now = performance.now();
-    return now >= navUntil && (touching || now - lastInput < 1500);
-  }
 
   function sectionBottom() { return includesSection.getBoundingClientRect().bottom; }
-
-  // il bordo in basso della sezione è entrato nello schermo e le card sono ancora visibili sopra
-  function reachedSectionEnd() {
-    const ih = window.innerHeight;
-    const bottom = sectionBottom();
-    const cards = viewport.getBoundingClientRect();
-    return bottom <= ih - STOP_GAP && bottom >= ih * 0.2 && cards.bottom > 0 && cards.top < ih;
-  }
 
   // Sul telefono il blocco con "overflow: hidden" non ferma lo scorrimento già avviato col dito (né l'inerzia):
   // si usa il body fissato nella posizione corrente, che ferma tutto subito. Su computer basta overflow.
@@ -473,6 +466,7 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
       document.body.style.overflow = '';
     }
     lastY = window.scrollY;
+    stopY = lastY;
   }
 
   // sblocca quando è passato il tempo minimo (e, se serve, la card ha finito di girare) e il dito non è più sullo schermo
@@ -481,7 +475,7 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     (function wait() {
       if (!locked) return;
       const t = performance.now() - start;
-      if (t >= maxMs || (t >= minMs && !touching && done())) { unlockPage(); return; }
+      if (t >= maxMs || (t >= minMs && !fingerDown() && done())) { unlockPage(); return; }
       setTimeout(wait, 80);
     })();
   }
@@ -517,6 +511,13 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   }
 
   window.addEventListener('scroll', () => {
+    const now = performance.now();
+    // movimento voluto dalla persona: parte da un suo gesto e dura finché la pagina continua a muoversi
+    // (anche per l'inerzia lunga dopo aver alzato il dito); uno scroll che parte da solo (menù, link) non conta
+    if (now - lastInput < 1500 || fingerDown()) userMotion = true;
+    else if (now - lastScrollEvt > 300) userMotion = false;
+    lastScrollEvt = now;
+
     const y = window.scrollY;
     if (locked) {
       if (!touchLock && y !== lockY) jumpTo(lockY);   // posizione ferma durante il blocco
@@ -524,13 +525,24 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     }
     const goingDown = y > lastY;
     lastY = y;
+    const ih = window.innerHeight;
+    const bottom = sectionBottom();
+    const stopEdge = ih - STOP_GAP;
+    const crossed = lastBottom > stopEdge && bottom <= stopEdge;   // il bordo della sezione ha superato il punto di stop scendendo
+    lastBottom = bottom;
+
     if (stage === 0) {
-      if (goingDown && userIsScrolling() && !carousel.classList.contains('touched')
-          && track.scrollLeft <= 4 && reachedSectionEnd()) stopAtSectionEnd();
+      // anche con uno scroll velocissimo (che salta oltre il punto) la pagina viene riportata al fondo della sezione
+      if (goingDown && crossed && userMotion && now >= navUntil
+          && !carousel.classList.contains('touched') && track.scrollLeft <= 4) stopAtSectionEnd();
     } else if (stage === 1) {
-      const bottom = sectionBottom();
-      if (bottom > window.innerHeight + 2) stage = 0;              // è risalito: la prossima discesa si ferma di nuovo
-      else if (bottom < window.innerHeight * 0.2) stage = 2;       // è andato oltre per altre vie (barra, link)
+      if (bottom > ih + 2) stage = 0;                       // è risalito: la prossima discesa si ferma di nuovo
+      else if (bottom < ih * 0.2) stage = 2;                // è andato oltre per altre vie (barra, link)
+      else if (y - stopY >= 4 && waitingForSecondScroll()) {
+        // secondo scroll: la pagina ha iniziato a scendere dal punto di stop -> torna lì e gira la card
+        jumpTo(stopY);
+        turnCard();
+      }
     }
   }, { passive: true });
 
@@ -552,6 +564,7 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     else touchY = null;
   }, { passive: true });
   window.addEventListener('touchmove', (e) => {
+    lastTouch = performance.now();
     if (locked) { if (e.cancelable) e.preventDefault(); return; }
     if (touchY === null || !waitingForSecondScroll()) return;
     const dy = e.touches[0].clientY - touchY;
