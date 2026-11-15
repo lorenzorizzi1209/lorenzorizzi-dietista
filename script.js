@@ -395,39 +395,37 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
 
-  // Primo tentativo di scendere con il carosello ben in vista: invece di scorrere la pagina,
-  // il carosello passa alla seconda card (una volta sola). Dopo, la pagina scorre come sempre.
-  let autoDone = false, armed = false, armTimer = null, lockUntil = 0;
+  // La prima volta che si prova a scendere con il carosello in vista: la pagina si blocca,
+  // il carosello gira alla seconda card e solo dopo (a movimento finito) la pagina scorre di nuovo.
+  // Succede una volta sola per visita.
+  let autoDone = false, lockUntil = 0;
 
   function carouselInView() {
     const r = viewport.getBoundingClientRect();
-    return r.top >= 0 && r.bottom <= window.innerHeight;
+    return r.top >= -2 && r.bottom <= window.innerHeight + 2;
   }
 
-  // "Pronto" solo se la persona si ferma un attimo sul carosello (non mentre ci sfreccia davanti)
-  function checkArm() {
-    if (autoDone) return;
-    if (carouselInView() && track.scrollLeft <= 4 && !carousel.classList.contains('touched')) {
-      if (!armed && !armTimer) armTimer = setTimeout(() => { armTimer = null; armed = true; }, 250);
-    } else {
-      clearTimeout(armTimer); armTimer = null; armed = false;
-    }
+  function canAutoAdvance() {
+    return !autoDone && carouselInView() && track.scrollLeft <= 4 && !carousel.classList.contains('touched');
   }
 
   function autoAdvance() {
-    autoDone = true; armed = false;
-    lockUntil = performance.now() + 600;   // assorbe l'inerzia dello scroll appena fatto
+    autoDone = true;
+    // blocco finché la card non ha finito di girare (poi la pagina è libera)
+    lockUntil = performance.now() + (reduceMotion ? 250 : 1500);   // tetto di sicurezza
     markTouched();
     goTo(1);
   }
 
-  window.addEventListener('scroll', checkArm, { passive: true });
-  window.addEventListener('resize', checkArm);
+  // appena la card ha finito di girare (se il browser lo segnala) la pagina si sblocca
+  track.addEventListener('scrollend', () => {
+    if (autoDone && performance.now() < lockUntil) lockUntil = performance.now() + 150;
+  });
 
   window.addEventListener('wheel', (e) => {
     if (e.ctrlKey || e.deltaY <= 0 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
     if (performance.now() < lockUntil) { e.preventDefault(); return; }
-    if (!armed || autoDone) return;
+    if (!canAutoAdvance()) return;
     e.preventDefault();
     autoAdvance();
   }, { passive: false });
@@ -438,16 +436,17 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     else touchY = null;
   }, { passive: true });
   window.addEventListener('touchmove', (e) => {
-    if (touchY === null || !armed || autoDone) return;
+    if (touchY === null) return;
     const dy = e.touches[0].clientY - touchY;
     const dx = e.touches[0].clientX - touchX;
     if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
     const goingDown = Math.abs(dy) > Math.abs(dx) && dy < 0;   // dito che sale = la pagina vorrebbe scendere
+    if (!goingDown) { touchY = null; return; }
+    // mentre la card gira, anche i gesti in corso restano bloccati
+    if (performance.now() < lockUntil) { if (e.cancelable) e.preventDefault(); return; }
     touchY = null;
-    if (goingDown && e.cancelable) { e.preventDefault(); autoAdvance(); }
+    if (canAutoAdvance() && e.cancelable) { e.preventDefault(); autoAdvance(); }
   }, { passive: false });
-
-  checkArm();
 
   // All'ingresso nella pagina le card fanno un piccolo movimento laterale (una volta sola)
   if (!reduceMotion && 'IntersectionObserver' in window) {
