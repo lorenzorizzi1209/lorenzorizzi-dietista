@@ -400,13 +400,18 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   // Succede una volta sola per visita.
   let autoDone = false, lockUntil = 0;
 
-  function carouselInView() {
-    const r = viewport.getBoundingClientRect();
-    return r.top >= -2 && r.bottom <= window.innerHeight + 2;
+  // "Fondo della sezione": il bordo dove lo sfondo cambia colore è entrato nello schermo
+  // (e il carosello è ancora visibile sopra di esso)
+  const includesSection = carousel.closest('section') || carousel;
+  function atSectionEnd() {
+    const ih = window.innerHeight;
+    const bottom = includesSection.getBoundingClientRect().bottom;
+    const cards = viewport.getBoundingClientRect();
+    return bottom <= ih + 2 && bottom >= ih * 0.2 && cards.bottom > 0 && cards.top < ih;
   }
 
   function canAutoAdvance() {
-    return !autoDone && carouselInView() && track.scrollLeft <= 4 && !carousel.classList.contains('touched');
+    return !autoDone && atSectionEnd() && track.scrollLeft <= 4 && !carousel.classList.contains('touched');
   }
 
   function autoAdvance() {
