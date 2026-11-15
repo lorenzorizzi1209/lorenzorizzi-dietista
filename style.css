@@ -779,6 +779,11 @@ footer span {
   background: var(--black-soft);
 }
 
+/* evita che la pagina "salti" di lato quando lo scorrimento viene bloccato per un attimo sotto le card */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Cosa comprende il percorso: carosello orizzontale */
 .inc-carousel {
   margin: 0 -24px;
