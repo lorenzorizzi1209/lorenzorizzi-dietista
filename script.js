@@ -407,6 +407,7 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   let stage = 0;               // 0 = non ancora arrivato, 1 = fermo al fondo, 2 = fatto
   let locked = false, lockY = 0;
   let lastY = window.scrollY, lastInput = 0, lastWheel = 0, touching = false, navUntil = 0;
+  let touchY = null, touchX = 0;
 
   // il blocco scatta solo se la persona sta scorrendo lei (non per un clic sul menù che porta più in basso)
   const noteInput = () => { lastInput = performance.now(); };
@@ -431,42 +432,81 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     return bottom <= ih - STOP_GAP && bottom >= ih * 0.2 && cards.bottom > 0 && cards.top < ih;
   }
 
+  // Sul telefono il blocco con "overflow: hidden" non ferma lo scorrimento già avviato col dito (né l'inerzia):
+  // si usa il body fissato nella posizione corrente, che ferma tutto subito. Su computer basta overflow.
+  const touchLock = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+  const rootEl = document.documentElement;
+
+  // salto istantaneo (senza animazione, anche se la pagina ha lo scorrimento "smooth")
+  function jumpTo(y) {
+    const prev = rootEl.style.scrollBehavior;
+    rootEl.style.scrollBehavior = 'auto';
+    window.scrollTo(0, y);
+    rootEl.style.scrollBehavior = prev;
+  }
+
+  let failsafe = null;
   function lockPage(y) {
     locked = true;
     lockY = y;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+    if (touchLock) {
+      const b = document.body.style;
+      b.position = 'fixed'; b.top = (-y) + 'px'; b.left = '0'; b.right = '0'; b.width = '100%';
+    } else {
+      rootEl.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    }
+    clearTimeout(failsafe);
+    failsafe = setTimeout(unlockPage, 5000);   // rete di sicurezza: la pagina non resta mai bloccata
   }
 
   function unlockPage() {
+    if (!locked) return;
     locked = false;
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
+    clearTimeout(failsafe);
+    if (touchLock) {
+      const b = document.body.style;
+      b.position = ''; b.top = ''; b.left = ''; b.right = ''; b.width = '';
+      jumpTo(lockY);
+    } else {
+      rootEl.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+    lastY = window.scrollY;
+  }
+
+  // sblocca quando è passato il tempo minimo (e, se serve, la card ha finito di girare) e il dito non è più sullo schermo
+  function releaseWhen(minMs, maxMs, done) {
+    const start = performance.now();
+    (function wait() {
+      if (!locked) return;
+      const t = performance.now() - start;
+      if (t >= maxMs || (t >= minMs && !touching && done())) { unlockPage(); return; }
+      setTimeout(wait, 80);
+    })();
   }
 
   // Tempo 1: la pagina si ferma sempre nello stesso punto, con la sezione che finisce appena sotto le card
   function stopAtSectionEnd() {
     stage = 1;
+    touchY = null;   // il gesto in corso non conta come "secondo scroll"
     const target = Math.max(0, Math.round(window.scrollY + sectionBottom() - (window.innerHeight - STOP_GAP)));
+    jumpTo(target);
     lockPage(target);
-    window.scrollTo({ top: target, left: 0, behavior: 'instant' });
-    setTimeout(unlockPage, STOP_LOCK_MS);
+    releaseWhen(STOP_LOCK_MS, 4000, () => true);
   }
 
   // Tempo 2: la card gira e la pagina resta ferma per almeno 1 secondo
   function turnCard() {
     stage = 2;
+    touchY = null;
     lockPage(window.scrollY);
     markTouched();
     goTo(1);
-    const start = performance.now();
     let cardTurned = false;
     track.addEventListener('scrollend', () => { cardTurned = true; }, { once: true });
-    (function wait() {
-      const t = performance.now() - start;
-      if (t >= TURN_LOCK_MAX_MS || (t >= TURN_LOCK_MS && cardTurned)) { unlockPage(); return; }
-      setTimeout(wait, 80);
-    })();
+    const arrived = () => cardTurned || Math.abs(track.scrollLeft - (cards[1].offsetLeft - startOffset())) < 2;   // anche dove manca "scrollend"
+    releaseWhen(TURN_LOCK_MS, TURN_LOCK_MAX_MS, arrived);
   }
 
   // pronto per il secondo scroll: fermo al fondo, carosello ancora alla prima card
@@ -479,7 +519,7 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
     if (locked) {
-      if (y !== lockY) window.scrollTo({ top: lockY, left: 0, behavior: 'instant' });   // posizione ferma durante il blocco
+      if (!touchLock && y !== lockY) jumpTo(lockY);   // posizione ferma durante il blocco
       return;
     }
     const goingDown = y > lastY;
@@ -507,7 +547,6 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     }
   }, { passive: false });
 
-  let touchY = null, touchX = 0;
   window.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) { touchY = e.touches[0].clientY; touchX = e.touches[0].clientX; }
     else touchY = null;
@@ -518,10 +557,9 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     const dy = e.touches[0].clientY - touchY;
     const dx = e.touches[0].clientX - touchX;
     if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
-    if (Math.abs(dy) > Math.abs(dx) && dy < 0 && e.cancelable) {   // dito che sale = la pagina vorrebbe scendere
-      e.preventDefault();
-      touchY = null;
-      turnCard();
+    if (Math.abs(dy) > Math.abs(dx) && dy < 0) {   // dito che sale = la pagina vorrebbe scendere
+      if (e.cancelable) e.preventDefault();
+      turnCard();                                   // il blocco della pagina ferma lo scorrimento anche se l'evento non era annullabile
     } else {
       touchY = null;
     }
