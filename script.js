@@ -315,6 +315,7 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   const prev = carousel.querySelector('.inc-prev');
   const next = carousel.querySelector('.inc-next');
   const dotsBox = carousel.querySelector('.inc-dots');
+  const current = carousel.querySelector('.inc-current');
   const cards = Array.from(track.children);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const behavior = reduceMotion ? 'auto' : 'smooth';
@@ -352,6 +353,7 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     next.disabled = x >= max - 4;
     const active = nearestIndex();
     dots.forEach((dot, i) => dot.classList.toggle('active', i === active));
+    if (current) current.textContent = String(active + 1);
     if (x > 12) markTouched();
   }
 

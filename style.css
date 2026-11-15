@@ -796,13 +796,14 @@ footer span {
 
 .inc-count {
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .inc-count strong {
   margin-right: 2px;
   color: var(--red-glow);
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 800;
 }
 
@@ -810,12 +811,16 @@ footer span {
 .inc-hint {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: var(--red-glow);
-  font-size: 0.75rem;
+  gap: 8px;
+  padding: 7px 12px 7px 14px;
+  color: #fff;
+  font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
+  background: var(--red-bright);
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(179, 18, 26, 0.35);
   transition: opacity 0.4s ease;
 }
 
@@ -899,8 +904,8 @@ footer span {
   position: relative;
   display: flex;
   flex-direction: column;
-  flex: 0 0 clamp(262px, 80vw, 330px);
-  padding: 32px 24px 24px;
+  flex: 0 0 clamp(240px, 68vw, 270px);
+  padding: 22px 22px 24px;
   overflow: hidden;
   scroll-snap-align: start;
   background: linear-gradient(165deg, var(--panel), var(--panel-deep));
@@ -917,32 +922,22 @@ footer span {
   }
 }
 
-.inc-num {
-  position: absolute;
-  top: 12px;
-  right: 18px;
-  color: rgba(255, 255, 255, 0.07);
-  font-size: 2.8rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
 .inc-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
-  margin-bottom: 20px;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 16px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--red-bright), var(--red-dark));
   box-shadow: 0 6px 14px rgba(179, 18, 26, 0.28);
 }
 
 .inc-title {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--text-main);
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   font-weight: 700;
   line-height: 1.3;
 }
@@ -950,9 +945,8 @@ footer span {
 .inc-desc {
   color: var(--text-muted);
   font-size: 0.95rem;
-  line-height: 1.55;
+  line-height: 1.5;
 }
-
 /* l'extra incluso si distingue dalle altre card */
 .inc-card-extra {
   background: linear-gradient(165deg, #4a1519 0%, var(--panel-deep) 100%);
@@ -962,73 +956,13 @@ footer span {
 
 .inc-label {
   display: block;
-  margin-bottom: 8px;
-  color: var(--red-glow);
-  font-size: 0.75rem;
+  margin-bottom: 6px;
+  color: var(--gold);
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
-
-/* cosa si ottiene, in punti */
-.inc-points {
-  margin: 18px 0 20px;
-  padding-top: 16px;
-  list-style: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.inc-points li {
-  position: relative;
-  padding: 0 0 9px 26px;
-  color: var(--text-main);
-  font-size: 0.92rem;
-  line-height: 1.4;
-}
-
-.inc-points li:last-child {
-  padding-bottom: 0;
-}
-
-.inc-points li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 18px;
-  height: 18px;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  line-height: 18px;
-  text-align: center;
-  background: var(--red-bright);
-  border-radius: 50%;
-}
-
-/* il beneficio finale, sempre in fondo alla card */
-.inc-result {
-  margin-top: auto;
-  padding: 12px 14px;
-  color: var(--text-main);
-  font-size: 0.92rem;
-  font-weight: 600;
-  line-height: 1.4;
-  background: rgba(255, 45, 58, 0.1);
-  border-left: 3px solid var(--red-glow);
-  border-radius: 0 8px 8px 0;
-}
-
-.inc-result span {
-  display: block;
-  margin-bottom: 2px;
-  color: var(--gold);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-}
-
 /* piccolo movimento all'ingresso nella pagina, una volta sola */
 .inc-carousel.nudge .inc-card {
   animation: incNudge 1.3s ease-in-out;
@@ -1051,15 +985,21 @@ footer span {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 52px;
+  height: 52px;
   padding: 0;
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+/* "Avanti" in rosso: è il gesto che si vuole far fare */
+.inc-next:not(:disabled) {
+  background: var(--red-bright);
+  border-color: var(--red-glow);
 }
 
 .inc-arrow:hover:not(:disabled) {
@@ -1112,19 +1052,13 @@ footer span {
   .offer-content.includes { padding-top: 60px; }
   .offer-content.includes .section-subtitle { margin-bottom: 26px; }
   .inc-card {
-    padding: 26px 20px 20px;
+    padding: 20px 20px 22px;
     scroll-snap-stop: always;
   }
-  .inc-icon {
-    width: 54px;
-    height: 54px;
-    margin-bottom: 16px;
-  }
-  .inc-title { font-size: 1.1rem; }
   .inc-top { gap: 4px 10px; }
-  .inc-count { font-size: 0.88rem; }
-  .inc-count strong { font-size: 1.2rem; }
-  .inc-hint { font-size: 0.68rem; letter-spacing: 1px; }
+  .inc-count { font-size: 0.95rem; }
+  .inc-count strong { font-size: 1.35rem; }
+  .inc-hint { padding: 6px 10px 6px 12px; font-size: 0.66rem; letter-spacing: 0.8px; }
   .inc-track { padding-bottom: 20px; }
   .inc-dots button { position: relative; }
   .inc-dots button::after {
