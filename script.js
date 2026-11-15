@@ -395,19 +395,21 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
 
-  // Arrivando sotto le card (fondo della sezione, dove lo sfondo cambia colore) la pagina si ferma:
-  // il carosello gira alla seconda card e la pagina resta bloccata per almeno 1 secondo,
-  // così non si passa direttamente alla sezione successiva. Poi si può scendere. Una volta sola per visita.
-  const MIN_LOCK_MS = 1000;   // blocco minimo
-  const MAX_LOCK_MS = 2200;   // tetto di sicurezza se il browser non segnala la fine del movimento
+  // Sotto le card, in due tempi (una sola volta per visita):
+  //  1) il primo scroll si ferma sempre al fondo della sezione (dove lo sfondo cambia colore);
+  //  2) il secondo scroll fa girare il carosello alla seconda card (pagina ferma per almeno 1 secondo);
+  //  dal terzo la pagina scorre come sempre.
+  const STOP_LOCK_MS = 500;    // fermo iniziale: assorbe l'inerzia dello scroll appena fatto
+  const TURN_LOCK_MS = 1000;   // blocco minimo mentre la card gira
+  const TURN_LOCK_MAX_MS = 2200;   // tetto di sicurezza se il browser non segnala la fine del movimento
+  const STOP_GAP = 24;         // distanza del bordo della sezione dal fondo dello schermo, quando ci si ferma
   const includesSection = carousel.closest('section') || carousel;
-  let autoDone = false, locked = false, lockY = 0;
-  let lastY = window.scrollY, lastInput = 0, touching = false, navUntil = 0;
+  let stage = 0;               // 0 = non ancora arrivato, 1 = fermo al fondo, 2 = fatto
+  let locked = false, lockY = 0;
+  let lastY = window.scrollY, lastInput = 0, lastWheel = 0, touching = false, navUntil = 0;
 
   // il blocco scatta solo se la persona sta scorrendo lei (non per un clic sul menù che porta più in basso)
   const noteInput = () => { lastInput = performance.now(); };
-  window.addEventListener('wheel', noteInput, { passive: true });
-  window.addEventListener('keydown', (e) => { if (['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar'].includes(e.key)) noteInput(); });
   window.addEventListener('touchstart', () => { touching = true; noteInput(); }, { passive: true });
   window.addEventListener('touchend', () => { touching = false; noteInput(); }, { passive: true });
   window.addEventListener('touchcancel', () => { touching = false; noteInput(); }, { passive: true });
@@ -419,17 +421,19 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     return now >= navUntil && (touching || now - lastInput < 1500);
   }
 
+  function sectionBottom() { return includesSection.getBoundingClientRect().bottom; }
+
   // il bordo in basso della sezione è entrato nello schermo e le card sono ancora visibili sopra
-  function atSectionEnd() {
+  function reachedSectionEnd() {
     const ih = window.innerHeight;
-    const bottom = includesSection.getBoundingClientRect().bottom;
+    const bottom = sectionBottom();
     const cards = viewport.getBoundingClientRect();
-    return bottom <= ih - 24 && bottom >= ih * 0.2 && cards.bottom > 0 && cards.top < ih;
+    return bottom <= ih - STOP_GAP && bottom >= ih * 0.2 && cards.bottom > 0 && cards.top < ih;
   }
 
-  function lockPage() {
+  function lockPage(y) {
     locked = true;
-    lockY = window.scrollY;
+    lockY = y;
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
   }
@@ -440,9 +444,19 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     document.body.style.overflow = '';
   }
 
-  function startLock() {
-    autoDone = true;
-    lockPage();
+  // Tempo 1: la pagina si ferma sempre nello stesso punto, con la sezione che finisce appena sotto le card
+  function stopAtSectionEnd() {
+    stage = 1;
+    const target = Math.max(0, Math.round(window.scrollY + sectionBottom() - (window.innerHeight - STOP_GAP)));
+    lockPage(target);
+    window.scrollTo({ top: target, left: 0, behavior: 'instant' });
+    setTimeout(unlockPage, STOP_LOCK_MS);
+  }
+
+  // Tempo 2: la card gira e la pagina resta ferma per almeno 1 secondo
+  function turnCard() {
+    stage = 2;
+    lockPage(window.scrollY);
     markTouched();
     goTo(1);
     const start = performance.now();
@@ -450,34 +464,74 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
     track.addEventListener('scrollend', () => { cardTurned = true; }, { once: true });
     (function wait() {
       const t = performance.now() - start;
-      // si sblocca quando sono passati almeno 1s E la card ha finito di girare (o al tetto di sicurezza)
-      if (t >= MAX_LOCK_MS || (t >= MIN_LOCK_MS && (cardTurned || nearestIndex() === 1 && Math.abs(track.scrollLeft - (cards[1].offsetLeft - startOffset())) < 2))) {
-        unlockPage();
-        return;
-      }
+      if (t >= TURN_LOCK_MAX_MS || (t >= TURN_LOCK_MS && cardTurned)) { unlockPage(); return; }
       setTimeout(wait, 80);
     })();
+  }
+
+  // pronto per il secondo scroll: fermo al fondo, carosello ancora alla prima card
+  function waitingForSecondScroll() {
+    if (stage !== 1) return false;
+    if (carousel.classList.contains('touched') || track.scrollLeft > 4) { stage = 2; return false; }
+    return true;
   }
 
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
     if (locked) {
-      if (y !== lockY) window.scrollTo(0, lockY);   // la posizione non si muove mentre il blocco è attivo
+      if (y !== lockY) window.scrollTo({ top: lockY, left: 0, behavior: 'instant' });   // posizione ferma durante il blocco
       return;
     }
     const goingDown = y > lastY;
     lastY = y;
-    if (!autoDone && goingDown && userIsScrolling() && atSectionEnd()
-        && track.scrollLeft <= 4 && !carousel.classList.contains('touched')) {
-      startLock();
+    if (stage === 0) {
+      if (goingDown && userIsScrolling() && !carousel.classList.contains('touched')
+          && track.scrollLeft <= 4 && reachedSectionEnd()) stopAtSectionEnd();
+    } else if (stage === 1) {
+      const bottom = sectionBottom();
+      if (bottom > window.innerHeight + 2) stage = 0;              // è risalito: la prossima discesa si ferma di nuovo
+      else if (bottom < window.innerHeight * 0.2) stage = 2;       // è andato oltre per altre vie (barra, link)
     }
   }, { passive: true });
 
-  // durante il blocco, anche rotella, dito e tastiera non fanno scorrere la pagina
-  window.addEventListener('wheel', (e) => { if (locked && !e.ctrlKey && Math.abs(e.deltaX) <= Math.abs(e.deltaY)) e.preventDefault(); }, { passive: false });
-  window.addEventListener('touchmove', (e) => { if (locked && e.cancelable) e.preventDefault(); }, { passive: false });
+  window.addEventListener('wheel', (e) => {
+    const now = performance.now();
+    const freshGesture = now - lastWheel > 120;     // pausa: non è l'inerzia del gesto precedente
+    lastWheel = now;
+    lastInput = now;
+    if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if (locked) { e.preventDefault(); return; }
+    if (e.deltaY > 0 && waitingForSecondScroll()) {
+      e.preventDefault();                           // la pagina non scende
+      if (freshGesture) turnCard();                 // un nuovo scroll fa girare la card
+    }
+  }, { passive: false });
+
+  let touchY = null, touchX = 0;
+  window.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) { touchY = e.touches[0].clientY; touchX = e.touches[0].clientX; }
+    else touchY = null;
+  }, { passive: true });
+  window.addEventListener('touchmove', (e) => {
+    if (locked) { if (e.cancelable) e.preventDefault(); return; }
+    if (touchY === null || !waitingForSecondScroll()) return;
+    const dy = e.touches[0].clientY - touchY;
+    const dx = e.touches[0].clientX - touchX;
+    if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
+    if (Math.abs(dy) > Math.abs(dx) && dy < 0 && e.cancelable) {   // dito che sale = la pagina vorrebbe scendere
+      e.preventDefault();
+      touchY = null;
+      turnCard();
+    } else {
+      touchY = null;
+    }
+  }, { passive: false });
+
   window.addEventListener('keydown', (e) => {
-    if (locked && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'End', 'Home', ' ', 'Spacebar'].includes(e.key)) e.preventDefault();
+    const down = ['ArrowDown', 'PageDown', ' ', 'Spacebar', 'End'].includes(e.key);
+    if (down) lastInput = performance.now();
+    if (locked && (down || ['ArrowUp', 'PageUp', 'Home'].includes(e.key))) { e.preventDefault(); return; }
+    if (down && waitingForSecondScroll()) { e.preventDefault(); if (!e.repeat) turnCard(); }
   });
 
   // All'ingresso nella pagina le card fanno un piccolo movimento laterale (una volta sola)
