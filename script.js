@@ -364,7 +364,9 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
 
   prev.addEventListener('click', () => { markTouched(); goTo(nearestIndex() - 1); });
   next.addEventListener('click', () => { markTouched(); goTo(nearestIndex() + 1); });
-  track.addEventListener('pointerdown', markTouched);
+  // Col dito, appoggiarsi sulle card per scorrere la pagina non vuol dire averle usate: conta solo lo scorrimento
+  // di lato (gestito in update()). Il clic del mouse sulle card invece sì.
+  track.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse') markTouched(); });
   track.addEventListener('keydown', markTouched);
 
   // Trascinamento col mouse (da telefono e trackpad si scorre già da soli)
@@ -424,7 +426,6 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   }, true);
 
   function sectionBottom() { return includesSection.getBoundingClientRect().bottom; }
-
   // Sul telefono il blocco con "overflow: hidden" non ferma lo scorrimento già avviato col dito (né l'inerzia):
   // si usa il body fissato nella posizione corrente, che ferma tutto subito. Su computer basta overflow.
   const touchLock = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
