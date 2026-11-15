@@ -395,6 +395,60 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
 
+  // Primo tentativo di scendere con il carosello ben in vista: invece di scorrere la pagina,
+  // il carosello passa alla seconda card (una volta sola). Dopo, la pagina scorre come sempre.
+  let autoDone = false, armed = false, armTimer = null, lockUntil = 0;
+
+  function carouselInView() {
+    const r = viewport.getBoundingClientRect();
+    return r.top >= 0 && r.bottom <= window.innerHeight;
+  }
+
+  // "Pronto" solo se la persona si ferma un attimo sul carosello (non mentre ci sfreccia davanti)
+  function checkArm() {
+    if (autoDone) return;
+    if (carouselInView() && track.scrollLeft <= 4 && !carousel.classList.contains('touched')) {
+      if (!armed && !armTimer) armTimer = setTimeout(() => { armTimer = null; armed = true; }, 250);
+    } else {
+      clearTimeout(armTimer); armTimer = null; armed = false;
+    }
+  }
+
+  function autoAdvance() {
+    autoDone = true; armed = false;
+    lockUntil = performance.now() + 600;   // assorbe l'inerzia dello scroll appena fatto
+    markTouched();
+    goTo(1);
+  }
+
+  window.addEventListener('scroll', checkArm, { passive: true });
+  window.addEventListener('resize', checkArm);
+
+  window.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.deltaY <= 0 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if (performance.now() < lockUntil) { e.preventDefault(); return; }
+    if (!armed || autoDone) return;
+    e.preventDefault();
+    autoAdvance();
+  }, { passive: false });
+
+  let touchY = null, touchX = 0;
+  window.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) { touchY = e.touches[0].clientY; touchX = e.touches[0].clientX; }
+    else touchY = null;
+  }, { passive: true });
+  window.addEventListener('touchmove', (e) => {
+    if (touchY === null || !armed || autoDone) return;
+    const dy = e.touches[0].clientY - touchY;
+    const dx = e.touches[0].clientX - touchX;
+    if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
+    const goingDown = Math.abs(dy) > Math.abs(dx) && dy < 0;   // dito che sale = la pagina vorrebbe scendere
+    touchY = null;
+    if (goingDown && e.cancelable) { e.preventDefault(); autoAdvance(); }
+  }, { passive: false });
+
+  checkArm();
+
   // All'ingresso nella pagina le card fanno un piccolo movimento laterale (una volta sola)
   if (!reduceMotion && 'IntersectionObserver' in window) {
     const nudgeObserver = new IntersectionObserver((entries) => {
