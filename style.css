@@ -283,10 +283,15 @@ ul {
   animation: heroFade 0.8s ease 0.65s both;
 }
 
+.hero-modes {
+  animation: heroFade 0.8s ease 0.8s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-photo-clip img,
   .hero-photo h1,
-  .hero-role {
+  .hero-role,
+  .hero-modes {
     animation: none;
   }
 }
@@ -306,6 +311,13 @@ ul {
   letter-spacing: 5px;
   font-size: 1.15rem;
   font-weight: 600;
+}
+
+.hero-modes {
+  margin-top: 14px;
+  color: var(--text-main);
+  font-size: 1.05rem;
+  font-weight: 500;
 }
 /* Buttons */
 .btn {
@@ -547,9 +559,31 @@ section {
 }
 
 .faq-item.active .faq-answer {
-  max-height: 900px;
+  max-height: 1600px;
   padding: 0 26px 24px;
 }
+
+.faq-answer p { margin-bottom: 12px; }
+
+.faq-steps,
+.faq-points {
+  margin: 0 0 4px;
+  padding-left: 20px;
+}
+
+.faq-points { list-style: disc; }
+
+.faq-steps li,
+.faq-points li {
+  margin-bottom: 10px;
+  line-height: 1.55;
+}
+
+.faq-steps li::marker { color: var(--red-glow); font-weight: 700; }
+.faq-points li::marker { color: var(--red-glow); }
+
+.faq-steps strong,
+.faq-points strong { color: var(--text-main); }
 
 /* ===== Contatti ===== */
 .contact {
@@ -779,341 +813,124 @@ footer span {
   background: var(--black-soft);
 }
 
-/* evita che la pagina "salti" di lato quando lo scorrimento viene bloccato per un attimo sotto le card */
-html {
-  scrollbar-gutter: stable;
-}
-
-/* Cosa comprende il percorso: carosello orizzontale */
-.inc-carousel {
-  margin: 0 -24px;
-}
-
-.inc-top {
+/* Cosa comprende il percorso: lista verticale a "scaletta" (1ª card a sinistra, 2ª a destra, ...) */
+.inc-list {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-  padding: 0 24px;
-  margin-bottom: 14px;
-}
-
-.inc-count {
-  color: var(--text-muted);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.inc-count strong {
-  margin-right: 2px;
-  color: var(--red-glow);
-  font-size: 1.5rem;
-  font-weight: 800;
-}
-
-/* invito a scorrere: sparisce appena la persona prova a girare il carosello */
-.inc-hint {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px 7px 14px;
-  color: #fff;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  background: var(--red-bright);
-  border-radius: 999px;
-  box-shadow: 0 4px 12px rgba(179, 18, 26, 0.35);
-  transition: opacity 0.4s ease;
-}
-
-.inc-hint svg {
-  animation: incArrow 1.4s ease-in-out infinite;
-}
-
-.inc-carousel.touched .inc-hint {
-  opacity: 0;
-}
-
-@keyframes incArrow {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(6px); }
-}
-
-.inc-viewport {
-  position: relative;
-}
-
-/* sfumature ai lati: la card tagliata suggerisce che c'è altro da vedere */
-.inc-viewport::before,
-.inc-viewport::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 2;
-  width: 44px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.inc-viewport::before {
-  left: 0;
-  background: linear-gradient(90deg, var(--black-soft), rgba(36, 28, 28, 0));
-}
-
-.inc-viewport::after {
-  right: 0;
-  background: linear-gradient(270deg, var(--black-soft), rgba(36, 28, 28, 0));
-}
-
-.inc-viewport.can-left::before,
-.inc-viewport.can-right::after {
-  opacity: 1;
-}
-
-.inc-track {
-  position: relative;
-  display: flex;
-  gap: 18px;
-  padding: 8px 24px 26px;
-  overflow-x: auto;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 620px;
+  margin: 0 auto;
   list-style: none;
-  scroll-snap-type: x mandatory;
-  scroll-padding: 0 24px;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  user-select: none;
-  cursor: grab;
-}
-
-.inc-track::-webkit-scrollbar {
-  display: none;
-}
-
-.inc-track.dragging {
-  cursor: grabbing;
-}
-
-.inc-track:focus-visible {
-  outline: 2px solid var(--red-glow);
-  outline-offset: -2px;
-  border-radius: 14px;
 }
 
 .inc-card {
-  position: relative;
   display: flex;
-  flex-direction: column;
-  flex: 0 0 clamp(262px, 78vw, 320px);
-  padding: 24px 22px 22px;
-  overflow: hidden;
-  scroll-snap-align: start;
+  align-items: center;
+  gap: 14px;
+  width: 86%;
+  padding: 16px 18px;
   background: linear-gradient(165deg, var(--panel), var(--panel-deep));
   border: 1px solid var(--border);
   border-radius: 14px;
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
+/* la prima dopo il piano parte da sinistra, la seconda da destra, e così via */
+.inc-card:nth-child(even) { align-self: flex-start; }
+.inc-card:nth-child(odd) { align-self: flex-end; }
+
 @media (hover: hover) {
   .inc-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     border-color: var(--red-glow);
-    box-shadow: 0 14px 30px rgba(179, 18, 26, 0.22);
+    box-shadow: 0 12px 26px rgba(179, 18, 26, 0.22);
   }
 }
 
 .inc-icon {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: 16px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--red-bright), var(--red-dark));
-  box-shadow: 0 6px 14px rgba(179, 18, 26, 0.28);
+  box-shadow: 0 5px 12px rgba(179, 18, 26, 0.28);
 }
 
 .inc-title {
-  margin-bottom: 8px;
+  margin-bottom: 3px;
   color: var(--text-main);
-  font-size: 1.4rem;
+  font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.3;
 }
 
 .inc-desc {
+  margin: 0;
   color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-/* cosa si ottiene, in punti */
-.inc-points {
-  margin: 16px 0 0;
-  padding-top: 14px;
-  list-style: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.inc-points li {
-  position: relative;
-  padding: 0 0 8px 26px;
-  color: var(--text-main);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   line-height: 1.4;
 }
 
-.inc-points li:last-child {
-  padding-bottom: 0;
+/* il piano su misura: in cima, a tutta larghezza e un po' più grande */
+.inc-card-main {
+  align-self: stretch;
+  width: 100%;
+  gap: 18px;
+  padding: 24px 24px;
+  border-color: var(--red-glow);
+  box-shadow: 0 14px 34px rgba(179, 18, 26, 0.2);
 }
 
-.inc-points li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 18px;
-  height: 18px;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  line-height: 18px;
-  text-align: center;
-  background: var(--red-bright);
-  border-radius: 50%;
+.inc-card-main .inc-icon {
+  width: 60px;
+  height: 60px;
+}
+
+.inc-card-main .inc-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.inc-card-main .inc-title {
+  margin-bottom: 5px;
+  font-size: 1.35rem;
+}
+
+.inc-card-main .inc-desc {
+  font-size: 1rem;
 }
 
 /* l'extra incluso si distingue dalle altre card */
 .inc-card-extra {
   background: linear-gradient(165deg, #4a1519 0%, var(--panel-deep) 100%);
   border-color: var(--red-glow);
-  box-shadow: 0 16px 38px rgba(179, 18, 26, 0.2);
 }
 
 .inc-label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
   color: var(--gold);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
-/* piccolo movimento all'ingresso nella pagina, una volta sola */
-.inc-carousel.nudge .inc-card {
-  animation: incNudge 1.3s ease-in-out;
+
+.inc-cta {
+  margin-top: 36px;
+  text-align: center;
 }
 
-@keyframes incNudge {
-  0%, 100% { translate: 0 0; }
-  40%, 60% { translate: -56px 0; }
-}
-
-.inc-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  padding: 0 24px;
-}
-
-.inc-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  padding: 0;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
-}
-
-/* "Avanti" in rosso: è il gesto che si vuole far fare */
-.inc-next:not(:disabled) {
-  background: var(--red-bright);
-  border-color: var(--red-glow);
-}
-
-.inc-arrow:hover:not(:disabled) {
-  color: #fff;
-  background: var(--red-bright);
-  border-color: var(--red-glow);
-}
-
-.inc-arrow:focus-visible {
-  outline: 2px solid var(--red-glow);
-  outline-offset: 3px;
-}
-
-.inc-arrow:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-
-.inc-dots {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.inc-dots button {
-  width: 8px;
-  height: 8px;
-  padding: 0;
-  background: rgba(255, 255, 255, 0.25);
-  border: 0;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: width 0.3s ease, background 0.3s ease;
-}
-
-.inc-dots button.active {
-  width: 26px;
-  background: var(--red-glow);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .inc-hint svg,
-  .inc-carousel.nudge .inc-card {
-    animation: none;
-  }
-}
-
-/* Mobile: una swipe = una card, sezione più compatta, comandi facili da toccare */
 @media (max-width: 600px) {
   .offer-content.includes { padding-top: 60px; }
   .offer-content.includes .section-subtitle { margin-bottom: 26px; }
-  .inc-card {
-    padding: 20px 20px 22px;
-    scroll-snap-stop: always;
-  }
-  .inc-title { font-size: 1.3rem; }
-  .inc-top { gap: 4px 10px; }
-  .inc-count { font-size: 0.95rem; }
-  .inc-count strong { font-size: 1.35rem; }
-  .inc-hint { padding: 6px 10px 6px 12px; font-size: 0.66rem; letter-spacing: 0.8px; }
-  .inc-track { padding-bottom: 20px; }
-  .inc-dots button { position: relative; }
-  .inc-dots button::after {
-    content: "";
-    position: absolute;
-    inset: -14px -4px;
-  }
-}
-
-@media (max-width: 400px) {
-  .inc-controls { gap: 12px; }
-  .inc-dots { gap: 6px; }
-  .inc-dots button.active { width: 20px; }
+  .inc-card { width: 90%; gap: 12px; padding: 14px 14px; }
+  .inc-card-main { width: 100%; padding: 20px 18px; gap: 14px; }
+  .inc-card-main .inc-title { font-size: 1.25rem; }
+  .inc-card-main .inc-desc { font-size: 0.95rem; }
 }
 
 .offer-content.includes .section-title {
@@ -1368,57 +1185,69 @@ html {
   margin-bottom: 24px;
 }
 
-.process-steps {
-  max-width: 700px;
-  margin: 0 auto 100px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-  position: relative;
+/* Due modalità dello stesso percorso: in studio / online */
+.modes {
+  max-width: 850px;
+  margin: 0 auto;
+  text-align: center;
 }
 
-.process-steps::before {
-  content: "";
-  position: absolute;
-  top: 24px;
-  bottom: 0;
-  left: 23px;
-  width: 2px;
-  /* stessa intensità del tratto tra il passo 2 e il 3, uniforme fino al fondo del testo del passo 5 */
-  background: rgba(179, 18, 26, 0.24);
-}
-
-.step {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-  position: relative;
-}
-
-.step-num {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--red-bright), var(--red-dark));
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.modes-title {
+  margin-bottom: 20px;
+  font-size: 1.35rem;
   font-weight: 800;
-  font-size: 1.1rem;
-  position: relative;
-  z-index: 1;
 }
 
-.step h4 {
+.modes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.mode-card {
+  padding: 22px 20px;
+  text-align: left;
+  background: linear-gradient(165deg, var(--panel), var(--panel-deep));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.mode-ic {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.mode-card h4 {
   margin-bottom: 6px;
-  font-size: 1.05rem;
-  margin-top: 10px;
+  font-size: 1.1rem;
 }
 
-.step p {
+.mode-card p {
+  margin: 0;
   color: var(--text-muted);
   font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.modes-note {
+  margin: 18px 0 0;
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .modes-grid { grid-template-columns: 1fr; gap: 14px; }
+  .modes-title { font-size: 1.2rem; }
+}
+
+.price-note {
+  margin-top: 28px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 .offer-cta {
@@ -1922,5 +1751,4 @@ html {
 
 /* Il mio metodo: meno testo, spazi più stretti */
 #come-funziona .offer-block { margin-bottom: 56px; }
-#come-funziona .process-steps { gap: 30px; }
 #come-funziona .section-title { margin-bottom: 30px; }
