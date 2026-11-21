@@ -1178,8 +1178,8 @@ footer span {
 }
 
 .mode-card {
-  padding: 22px 20px;
-  text-align: left;
+  padding: 24px 20px;
+  text-align: center;
   background: linear-gradient(165deg, var(--panel), var(--panel-deep));
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -1187,14 +1187,24 @@ footer span {
 
 .mode-ic {
   display: block;
-  margin-bottom: 8px;
-  font-size: 1.7rem;
+  margin-bottom: 10px;
+  font-size: 2rem;
   line-height: 1;
 }
 
 .mode-card h4 {
-  margin-bottom: 6px;
-  font-size: 1.1rem;
+  margin-bottom: 4px;
+  font-size: 1.15rem;
+}
+
+.mode-place {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
 }
 
 .mode-card p {
@@ -1212,8 +1222,13 @@ footer span {
 }
 
 @media (max-width: 600px) {
-  .modes-grid { grid-template-columns: 1fr; gap: 14px; }
+  .modes-grid { gap: 12px; }
   .modes-title { font-size: 1.2rem; }
+  .mode-card { padding: 20px 12px; }
+  .mode-card h4 { font-size: 1.05rem; }
+  .mode-place { font-size: 0.64rem; letter-spacing: 0.6px; }
+  .mode-card p { font-size: 0.84rem; line-height: 1.45; }
+  .modes-note { font-size: 0.95rem; }
 }
 
 .price-note {
