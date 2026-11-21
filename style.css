@@ -1351,10 +1351,10 @@ footer span {
 
 @media (max-width: 600px) {
   .offer-content {
-    padding-bottom: 50px;
+    padding-bottom: 84px;
   }
   .offer-cta {
-    padding: 50px 20px;
+    padding: 64px 20px;
   }
   .offer-cta h2 {
     font-size: 1.5rem;
