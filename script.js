@@ -85,11 +85,25 @@ const META_PIXEL_ID = '1873333810309595';
 
 // Solo i pulsanti "Prenota" e "Scrivimi" (link WhatsApp) contano come contatto
 function trackButtonClicks() {
+  let contactViewSent = false;
   document.querySelectorAll('a[href^="https://wa.me"]').forEach(el => {
     el.addEventListener('click', () => {
       const label = el.dataset.label || el.textContent.replace(/\s+/g, ' ').trim();
       if (window.gtag) {
-        window.gtag('event', 'contact_click', { event_category: 'contatto', event_label: label });
+        // Evento di contatto: uno per ogni clic, con il pulsante premuto come etichetta
+        window.gtag('event', 'contact_click', {
+          event_category: 'contatto',
+          event_label: label,
+          link_url: el.href
+        });
+        // Come per Home / Prezzi / LastCard: una visualizzazione di pagina con titolo dedicato (una sola volta per visita)
+        if (!contactViewSent) {
+          contactViewSent = true;
+          window.gtag('event', 'page_view', {
+            page_title: 'Lorenzo Rizzi | Contatto',
+            page_location: location.origin + location.pathname + location.search + '#contatto'
+          });
+        }
       }
       if (window.fbq) {
         window.fbq('track', 'Contact', { method: label });
