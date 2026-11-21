@@ -126,7 +126,10 @@ function loadAnalytics() {
   window.gtag = gtag;
   gtag('js', new Date());
   // Il page_view lo inviamo noi, con un titolo dedicato (i nomi degli eventi GA non ammettono spazi o "|")
-  gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
+  // page_title di default: gli eventi automatici di Google (scroll, engagement, inizio sessione...) usano il titolo
+  // della pagina HTML ("Lorenzo Rizzi | Dietista Sportivo") e compaiono come una voce in più nel report delle pagine.
+  // Con questo titolo restano tutti sotto "Home", e le voci Prezzi / LastCard / Contatto le inviamo noi con il loro titolo.
+  gtag('config', GA_MEASUREMENT_ID, { send_page_view: false, page_title: 'Lorenzo Rizzi | Home' });
 
   // Evento 1: arrivo sul sito
   const pageBase = location.origin + location.pathname + location.search;
