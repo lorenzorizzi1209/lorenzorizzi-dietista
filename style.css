@@ -1200,7 +1200,7 @@ footer span {
 .mode-place {
   display: block;
   margin-bottom: 12px;
-  color: var(--gold);
+  color: var(--red-glow);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 1.2px;
