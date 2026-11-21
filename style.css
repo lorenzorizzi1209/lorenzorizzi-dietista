@@ -1185,11 +1185,17 @@ footer span {
   border-radius: 14px;
 }
 
+/* stessa icona tonda delle card di "Cosa comprende il percorso" */
 .mode-ic {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 2rem;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--red-bright), var(--red-dark));
+  box-shadow: 0 5px 12px rgba(179, 18, 26, 0.28);
 }
 
 .mode-card h4 {
