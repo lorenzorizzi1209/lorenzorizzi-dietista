@@ -163,7 +163,7 @@ function loadAnalytics() {
   }
 
   // Evento: la persona ha fatto scorrere il carosello "Cosa comprende" fino all'ultima card (una sola volta per visita)
-  const lastIncludeCard = document.querySelector('.inc-card:last-child');
+  const lastIncludeCard = Array.from(document.querySelectorAll('.inc-card')).pop();
   if (lastIncludeCard) {
     const lastCardObserver = new IntersectionObserver((entries) => {
       if (entries.some(e => e.isIntersecting)) {
@@ -304,6 +304,21 @@ document.querySelectorAll('.cookie-preferences-link').forEach(link => {
 
   tick();
   timerId = setInterval(tick, 1000);
+})();
+
+// Cosa comprende: le card hanno sempre tutte la stessa altezza (quella della più alta, a qualsiasi larghezza di schermo)
+(function () {
+  const cards = Array.from(document.querySelectorAll('.inc-card'));
+  if (!cards.length) return;
+  function equalize() {
+    cards.forEach(c => { c.style.minHeight = ''; });
+    const tallest = Math.max.apply(null, cards.map(c => c.offsetHeight));
+    cards.forEach(c => { c.style.minHeight = tallest + 'px'; });
+  }
+  equalize();
+  window.addEventListener('load', equalize);
+  window.addEventListener('resize', equalize);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(equalize);
 })();
 
 // Risultato: il percorso curvo si disegna mentre si scorre la pagina e accende i passaggi

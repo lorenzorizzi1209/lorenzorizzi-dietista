@@ -813,21 +813,44 @@ footer span {
   background: var(--black-soft);
 }
 
-/* Cosa comprende il percorso: lista verticale a "scaletta" (1ª card a sinistra, 2ª a destra, ...) */
+/* Cosa comprende il percorso: 3 gruppi, card tutte uguali a "scaletta" (1ª a sinistra, 2ª a destra) */
+.inc-group {
+  max-width: 620px;
+  margin: 0 auto 38px;
+}
+
+.inc-group-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: var(--text-main);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.inc-group-title::before {
+  content: "";
+  flex-shrink: 0;
+  width: 34px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red-bright), var(--gold));
+}
+
 .inc-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-width: 620px;
-  margin: 0 auto;
+  gap: 16px;
   list-style: none;
 }
 
 .inc-card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
   width: 86%;
+  min-height: 100px;
   padding: 16px 18px;
   background: linear-gradient(165deg, var(--panel), var(--panel-deep));
   border: 1px solid var(--border);
@@ -835,9 +858,9 @@ footer span {
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* la prima dopo il piano parte da sinistra, la seconda da destra, e così via */
-.inc-card:nth-child(even) { align-self: flex-start; }
-.inc-card:nth-child(odd) { align-self: flex-end; }
+/* in ogni gruppo la prima parte da sinistra, la seconda da destra, la terza da sinistra */
+.inc-card:nth-child(odd) { align-self: flex-start; }
+.inc-card:nth-child(even) { align-self: flex-end; }
 
 @media (hover: hover) {
   .inc-card:hover {
@@ -852,8 +875,8 @@ footer span {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--red-bright), var(--red-dark));
   box-shadow: 0 5px 12px rgba(179, 18, 26, 0.28);
@@ -874,49 +897,25 @@ footer span {
   line-height: 1.4;
 }
 
-/* il piano su misura: in cima, a tutta larghezza e un po' più grande */
-.inc-card-main {
-  align-self: stretch;
-  width: 100%;
-  gap: 18px;
-  padding: 24px 24px;
-  border-color: var(--red-glow);
-  box-shadow: 0 14px 34px rgba(179, 18, 26, 0.2);
-}
-
-.inc-card-main .inc-icon {
-  width: 60px;
-  height: 60px;
-}
-
-.inc-card-main .inc-icon svg {
-  width: 28px;
-  height: 28px;
-}
-
-.inc-card-main .inc-title {
-  margin-bottom: 5px;
-  font-size: 1.35rem;
-}
-
-.inc-card-main .inc-desc {
-  font-size: 1rem;
-}
-
-/* l'extra incluso si distingue dalle altre card */
+/* l'extra incluso si distingue con un badge */
 .inc-card-extra {
   background: linear-gradient(165deg, #4a1519 0%, var(--panel-deep) 100%);
   border-color: var(--red-glow);
 }
 
-.inc-label {
-  display: block;
-  margin-bottom: 3px;
-  color: var(--gold);
+.inc-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  padding: 3px 11px;
+  color: #1a0f0f;
   font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 2px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
+  background: var(--gold);
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
 }
 
 .inc-cta {
@@ -927,10 +926,9 @@ footer span {
 @media (max-width: 600px) {
   .offer-content.includes { padding-top: 60px; }
   .offer-content.includes .section-subtitle { margin-bottom: 26px; }
-  .inc-card { width: 90%; gap: 12px; padding: 14px 14px; }
-  .inc-card-main { width: 100%; padding: 20px 18px; gap: 14px; }
-  .inc-card-main .inc-title { font-size: 1.25rem; }
-  .inc-card-main .inc-desc { font-size: 0.95rem; }
+  .inc-group { margin-bottom: 30px; }
+  .inc-group-title { font-size: 1.15rem; margin-bottom: 16px; }
+  .inc-card { width: 90%; gap: 12px; padding: 14px 14px; min-height: 120px; }
 }
 
 .offer-content.includes .section-title {
