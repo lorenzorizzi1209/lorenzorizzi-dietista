@@ -96,7 +96,7 @@ function trackButtonClicks() {
           event_label: label,
           link_url: el.href
         });
-        // Come per Home / Prezzi / LastCard: una visualizzazione di pagina con titolo dedicato (una sola volta per visita)
+        // Come per Home / Prezzi: una visualizzazione di pagina con titolo dedicato (una sola volta per visita)
         if (!contactViewSent) {
           contactViewSent = true;
           window.gtag('event', 'page_view', {
@@ -128,7 +128,7 @@ function loadAnalytics() {
   // Il page_view lo inviamo noi, con un titolo dedicato (i nomi degli eventi GA non ammettono spazi o "|")
   // page_title di default: gli eventi automatici di Google (scroll, engagement, inizio sessione...) usano il titolo
   // della pagina HTML ("Lorenzo Rizzi | Dietista Sportivo") e compaiono come una voce in più nel report delle pagine.
-  // Con questo titolo restano tutti sotto "Home", e le voci Prezzi / LastCard / Contatto le inviamo noi con il loro titolo.
+  // Con questo titolo restano tutti sotto "Home", e le voci Prezzi / Contatto le inviamo noi con il loro titolo.
   gtag('config', GA_MEASUREMENT_ID, { send_page_view: false, page_title: 'Lorenzo Rizzi | Home' });
 
   // Evento 1: arrivo sul sito
@@ -177,24 +177,6 @@ function loadAnalytics() {
       }
     }, { threshold: 0.2 });
     pricingObserver.observe(pricingSection);
-  }
-
-  // Evento: la persona ha fatto scorrere il carosello "Cosa comprende" fino all'ultima card (una sola volta per visita)
-  const lastIncludeCard = Array.from(document.querySelectorAll('.inc-card')).pop();
-  if (lastIncludeCard) {
-    const lastCardObserver = new IntersectionObserver((entries) => {
-      if (entries.some(e => e.isIntersecting)) {
-        lastCardObserver.disconnect();
-        // Come per "Home" e "Prezzi": per Google è una visualizzazione di pagina con titolo dedicato
-        // (i nomi degli eventi GA non ammettono spazi né simboli, il titolo sì)
-        window.gtag('event', 'page_view', {
-          page_title: 'Lorenzo Rizzi | LastCard',
-          page_location: pageBase + '#ultima-card'
-        });
-        window.fbq('trackCustom', 'ViewLastCard', { content_name: 'Cosa comprende: ultima card' });
-      }
-    }, { threshold: 0.6 });
-    lastCardObserver.observe(lastIncludeCard);
   }
 
   trackButtonClicks();
